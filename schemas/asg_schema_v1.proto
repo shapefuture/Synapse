@@ -1,0 +1,179 @@
+syntax = "proto3";
+
+package synapse.asg.v1;
+
+// Abstract Semantic Graph (ASG) v1.0 Schema
+
+// The top-level structure representing an entire ASG
+message AsgGraph {
+  repeated AsgNode nodes = 1;
+  uint64 root_node_id = 2;  // Optional entry point
+}
+
+// Enum defining the possible node types in the ASG
+enum NodeType {
+  NODE_TYPE_UNSPECIFIED = 0;
+  TERM_VARIABLE = 1;
+  TERM_LAMBDA = 2;
+  TERM_APPLICATION = 3;
+  LITERAL_INT = 4;
+  LITERAL_BOOL = 5;
+  PRIMITIVE_OP = 6;
+  TERM_REF = 7;
+  TERM_DEREF = 8;
+  TERM_ASSIGN = 9;
+  EFFECT_PERFORM = 10;
+  PROOF_OBLIGATION = 11;
+  TYPE_NODE = 12;
+  METADATA = 50;
+}
+
+// ASG Node representing a single entity in the semantic graph
+message AsgNode {
+  uint64 node_id = 1;
+  NodeType type = 2;
+  oneof content {
+    TermVariable term_variable = 3;
+    TermLambda term_lambda = 4;
+    TermApplication term_application = 5;
+    LiteralInt literal_int = 6;
+    LiteralBool literal_bool = 7;
+    PrimitiveOp primitive_op = 8;
+    TermRef term_ref = 9;
+    TermDeref term_deref = 10;
+    TermAssign term_assign = 11;
+    EffectPerform effect_perform = 12;
+    ProofObligation proof_obligation = 13;
+    TypeNode type_node = 14;
+    Metadata metadata = 50;
+  }
+}
+
+// Variable reference
+message TermVariable {
+  string name = 1;
+  uint64 definition_node_id = 2;  // Link to lambda binder or let binding
+}
+
+// Lambda abstraction (function definition)
+message TermLambda {
+  uint64 binder_variable_node_id = 1;
+  uint64 body_node_id = 2;
+  uint64 type_annotation_id = 3;  // Optional link to TypeNode
+}
+
+// Function application
+message TermApplication {
+  uint64 function_node_id = 1;
+  uint64 argument_node_id = 2;
+}
+
+// Integer literal
+message LiteralInt {
+  int64 value = 1;
+}
+
+// Boolean literal
+message LiteralBool {
+  bool value = 1;
+}
+
+// Primitive operation (e.g., add, subtract, etc.)
+message PrimitiveOp {
+  string op_name = 1;
+  repeated uint64 argument_node_ids = 2;
+}
+
+// Reference creation
+message TermRef {
+  uint64 init_value_node_id = 1;
+}
+
+// Dereference operation
+message TermDeref {
+  uint64 ref_node_id = 1;
+}
+
+// Assignment operation
+message TermAssign {
+  uint64 ref_node_id = 1;
+  uint64 value_node_id = 2;
+}
+
+// Effect performance
+message EffectPerform {
+  string effect_name = 1;
+  uint64 value_node_id = 2;  // Node ID of the value passed to the effect
+}
+
+// Type-specific details
+message TypeNode {
+  uint64 node_id = 1;
+  TypeKind type_kind = 2;
+  oneof content {
+    TypeInt type_int = 3;
+    TypeBool type_bool = 4;
+    TypeFunction type_function = 5;
+    TypeRef type_ref = 6;
+    TypeUnit type_unit = 7;
+  }
+}
+
+// Enum defining the possible type kinds
+enum TypeKind {
+  TYPE_KIND_UNSPECIFIED = 0;
+  TYPE_INT = 1;
+  TYPE_BOOL = 2;
+  TYPE_FUNCTION = 3;
+  TYPE_REF = 4;
+  TYPE_UNIT = 5;
+}
+
+// Int type
+message TypeInt {}
+
+// Bool type
+message TypeBool {}
+
+// Function type
+message TypeFunction {
+  uint64 parameter_type_id = 1;
+  uint64 return_type_id = 2;
+}
+
+// Reference type
+message TypeRef {
+  uint64 element_type_id = 1;
+}
+
+// Unit type
+message TypeUnit {}
+
+// Proof obligation
+message ProofObligation {
+  uint64 node_id = 1;
+  string description = 2;
+  uint64 related_code_node_id = 3;
+  enum Status {
+    STATUS_PENDING = 0;
+    STATUS_DISCHARGED = 1;
+    STATUS_FAILED = 2;
+  }
+  Status status = 4;
+}
+
+// Metadata for nodes (source location, annotations, etc.)
+message Metadata {
+  uint64 node_id = 1;
+  SourceLocation source_location = 2;
+  repeated uint64 annotation_ids = 3;
+}
+
+// Source code location information
+message SourceLocation {
+  string filename = 1;
+  uint32 start_line = 2;
+  uint32 start_col = 3;
+  uint32 end_line = 4;
+  uint32 end_col = 5;
+}

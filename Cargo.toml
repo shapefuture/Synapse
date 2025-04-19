@@ -1,44 +1,14 @@
 [workspace]
 members = [
-    # Core Libraries
     "asg_core",
     "parser_core",
     "formatter_core",
-    "type_checker_l1",
-    "upir_core",
-    "asg_to_upir",
-    "upir_to_llvm",
-    "synapse_runtime",
-
-    # Tools
     "synapse_cli",
-    "synapse_lsp",
-    "synapse_ai_api",
-    "synapse_debugger",
-    "synapse_pkg",
-    "synapse_collab_server",
-
-    # Advanced Type Checkers
-    "type_checker_l2",
-    "type_checker_l3_core",
-    "type_checker_l3_full",
-
-    # Additional Backends
-    "upir_to_spirv",
-    "upir_to_qsim",
-
-    # Other Components
-    "proof_manager",
-    "proof_synthesis_assist",
-    "synapse_uart",
-    "verified_ffi",
-    "ethics_checker",
-    "macro_expander",
-    "aspe_pythonic_v1",
 ]
+resolver = "2"
 
-[profile.release]
-lto = true
-codegen-units = 1
-opt-level = 3
-debug = false
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Synapse Team"]
+license = "MIT"

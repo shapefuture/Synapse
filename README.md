@@ -1,74 +1,109 @@
 # Synapse Programming Language
 
-Vision: Computationally verifiable, AI-native, adaptive system for human-AI collaboration.
+Synapse is a next-generation programming language designed with a focus on formal verification, quantitative types, effect systems, and AI-assisted development.
 
-Synapse is a programming language designed with the following key principles:
+## Overview
 
-- **Verifiability First**: Core semantics are formally defined and verified
-- **AI-Native**: Designed for seamless human-AI collaboration
-- **Adaptive**: Multiple projections (syntax forms) for the same semantic model
-- **Resource-Aware**: Quantitative type system for precise resource management
-- **Effect-Tracked**: Effect system for reasoning about computational effects
+Synapse is built on the principle of "Verifiability First," aiming to provide a robust programming language that can express and verify complex properties while remaining practical and performant. Key features include:
 
-## Project Structure
+- Formal semantics and type system
+- Quantitative types for resource management
+- Effect tracking
+- Dependent types for expressing rich invariants
+- AI integration for developer assistance
+- Universal Adaptive Runtime (UART)
+- Support for various hardware targets (CPU, GPU, Quantum)
 
-The Synapse project is organized as a multi-crate Rust workspace:
+## Project Status
 
-### Core Libraries
-- `asg_core`: Abstract Semantic Graph core library
-- `parser_core`: Parser for the minimal text format
-- `formatter_core`: Pretty printer for ASG
-- `type_checker_l1`: Basic type checker (Hindley-Milner)
-- `upir_core`: Universal Polymorphic Intermediate Representation
-- `asg_to_upir`: Compiler stage to translate ASG to UPIR
-- `upir_to_llvm`: Compiler stage to translate UPIR to LLVM IR
-- `synapse_runtime`: Minimal runtime library
+Synapse is currently in the early development phase. We are working on implementing the core language features and compiler pipeline according to the phased approach outlined in our implementation plan.
 
-### Tools
-- `synapse_cli`: Command-line interface
-- `synapse_lsp`: Language Server Protocol implementation
-- `synapse_ai_api`: AI integration API
-- `synapse_debugger`: Debugging tools
-- `synapse_pkg`: Package manager
-- `synapse_collab_server`: Collaborative editing server
+### Completed Features
 
-### Advanced Type Checkers
-- `type_checker_l2`: Quantitative and effect types
-- `type_checker_l3_core`: Dependent types with SMT solver integration
-- `type_checker_l3_full`: Full dependent type system
+- [x] Formal semantics definition (core)
+- [x] ASG schema definition
+- [x] Core ASG libraries
+- [x] Minimal parser and formatter
+- [x] Basic CLI and linter (Level 0)
 
-### Additional Backends
-- `upir_to_spirv`: UPIR to SPIR-V for GPU
-- `upir_to_qsim`: UPIR to quantum simulator
+### Current Development Focus
 
-### Other Components
-- `proof_manager`: Proof management
-- `proof_synthesis_assist`: Proof synthesis assistance
-- `synapse_uart`: Universal Abstract Representation Translator
-- `verified_ffi`: Verified Foreign Function Interface
-- `ethics_checker`: Ethics checking
-- `macro_expander`: Macro expansion
-- `aspe_pythonic_v1`: Pythonic projection
-
-## Development Status
-
-This project is currently in early development, following the phased implementation plan outlined in `plan.md`.
-
-See `DESIGN_LOG.md` for architecture decisions and `CONTRIBUTING.md` for contribution guidelines.
+- [ ] Type checker implementation (Level 1)
+- [ ] Universal Polymorphic Intermediate Representation (UPIR)
+- [ ] ASG-to-UPIR lowering
+- [ ] UPIR-to-LLVM lowering
+- [ ] Minimal runtime implementation
 
 ## Getting Started
 
-Prerequisites:
-- Rust (latest stable)
-- LLVM development libraries
-- Protocol Buffers compiler (protoc)
+### Prerequisites
 
-To build the project:
+- Rust toolchain (stable)
+- Protobuf compiler (protoc)
+
+### Building from Source
+
 ```bash
-cargo build
+# Clone the repository
+git clone https://github.com/synapse-lang/synapse.git
+cd synapse
+
+# Build the project
+cargo build --release
+
+# Run tests
+cargo test
 ```
 
-To run the CLI:
+### Using the CLI
+
 ```bash
-cargo run -p synapse_cli
+# Parse a Synapse file
+cargo run -- parse examples/hello.syn
+
+# Format a Synapse file
+cargo run -- format examples/hello.syn -o formatted.syn
+
+# Lint a Synapse file
+cargo run -- lint examples/hello.syn
+
+# Dump the ASG to JSON
+cargo run -- dump-asg examples/hello.syn --format json -o hello.json
 ```
+
+## Language Example
+
+```
+# A simple function in Synapse
+(x: Int) => x * x + 1
+
+# Function with effects
+(x: Int) => perform('IO', x + 1)
+
+# Reference operations
+(r: Ref Int) => {
+  !r := !r + 1;
+  !r
+}
+```
+
+## Project Structure
+
+- `asg_core/` - Core library for the Abstract Semantic Graph
+- `parser_core/` - Parser for the core language
+- `formatter_core/` - Pretty printer for the core language
+- `synapse_cli/` - Command-line interface
+- `docs/` - Documentation, including formal specifications
+- `schemas/` - Protocol Buffer schemas
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+## Acknowledgments
+
+Synapse draws inspiration from many languages and research projects in the programming language community, including but not limited to Rust, OCaml, Lean, F*, and Linear Haskell.
