@@ -15,25 +15,25 @@ Output:
 Formal Semantics Specification Document (docs/semantics/core_v0.1.pdf or .tex).
 Machine-checkable Proof Assistant files (proofs/semantics/core_v0.1.v or .thy or .k).
 Instructions:
-[ ] Choose Formalism: Decide on the primary semantic style. Recommendation: Small-step Structural Operational Semantics (SOS). It's often easier to model fine-grained evaluation and concurrency later. Document this choice in DESIGN_LOG.md.
-[ ] Define Core Syntax (Abstract): Define the abstract syntax terms (metavariables: t for terms, v for values, τ for types, Γ for typing contexts, σ for stores/memory). Include:
+[v] Choose Formalism: Decide on the primary semantic style. Recommendation: Small-step Structural Operational Semantics (SOS). It's often easier to model fine-grained evaluation and concurrency later. Document this choice in DESIGN_LOG.md.
+[v] Define Core Syntax (Abstract): Define the abstract syntax terms (metavariables: t for terms, v for values, τ for types, Γ for typing contexts, σ for stores/memory). Include:
 t ::= x | λx:τ. t | t₁ t₂ | c | op(t₁, ..., tₙ) | ref t | !t | t₁ := t₂ | perform E t (variable, abstraction, application, constants c, primitive ops op, reference creation, dereference, assignment, basic effect perform)
 v ::= λx:τ. t | c | loc (values: closures, constants, memory locations loc)
 τ ::= Int | Bool | τ₁ -> τ₂ | Ref τ | ... (basic types: integers, booleans, function types, reference types)
 E ::= 'EffectName (Effect identifiers)
-[ ] Define Judgments: Specify the key relations to be defined by rules:
+[v] Define Judgments: Specify the key relations to be defined by rules:
 Typing: Γ ⊢ t : τ (Term t has type τ in context Γ)
 Evaluation (SOS): ⟨t, σ⟩ ⟶ ⟨t', σ'⟩ (Term t with store σ steps to term t' and store σ')
-[ ] Write Inference Rules:
-[ ] Define typing rules for each term construct (variable lookup, lambda abstraction, application, constants, primitive ops, ref/deref/assign, perform). Focus: Standard simply-typed lambda calculus rules initially, plus rules for state.
-[ ] Define evaluation rules (SOS). Include rules for function application (beta-reduction, potentially call-by-value), primitive operations, state operations (ref allocates new location, ! reads from store, := updates store), and context rules to allow evaluation within subterms.
-[ ] Best Practice (Formal Spec): Create the docs/semantics/ directory. Write the specification document using clear mathematical notation (LaTeX recommended). Define every symbol and judgment used. Explain the intuition behind the rules. Version the document (core_v0.1).
-[ ] Best Practice (Verification): Create the proofs/semantics/ directory. Begin formalizing the syntax, typing rules, and evaluation rules in your chosen proof assistant (Coq recommended).
-[ ] Define the inductive types for terms and types.
-[ ] Define the typing judgment (Inductive typing : context -> term -> type -> Prop := ...).
-[ ] Define the evaluation judgment (Inductive step : state -> term -> state -> term -> Prop := ...).
-[ ] Goal: State and attempt (even if manually) proofs for Type Preservation (if Γ ⊢ t : τ and ⟨t, σ⟩ ⟶ ⟨t', σ'⟩, then Γ ⊢ t' : τ) and Progress (if Γ ⊢ t : τ, then t is a value or there exists t', σ' such that ⟨t, σ⟩ ⟶ ⟨t', σ'⟩). These proofs are crucial for validating the semantics.
-[ ] Review Point: Have a peer (or use the AI agent's analytical capabilities) review the rules for internal consistency, completeness (covering all defined syntax), and correctness according to PL theory standards. Ensure the proof assistant formalization matches the document.
+[v] Write Inference Rules:
+[v] Define typing rules for each term construct (variable lookup, lambda abstraction, application, constants, primitive ops, ref/deref/assign, perform). Focus: Standard simply-typed lambda calculus rules initially, plus rules for state.
+[v] Define evaluation rules (SOS). Include rules for function application (beta-reduction, potentially call-by-value), primitive operations, state operations (ref allocates new location, ! reads from store, := updates store), and context rules to allow evaluation within subterms.
+[v] Best Practice (Formal Spec): Create the docs/semantics/ directory. Write the specification document using clear mathematical notation (LaTeX recommended). Define every symbol and judgment used. Explain the intuition behind the rules. Version the document (core_v0.1).
+[v] Best Practice (Verification): Create the proofs/semantics/ directory. Begin formalizing the syntax, typing rules, and evaluation rules in your chosen proof assistant (Coq recommended).
+[v] Define the inductive types for terms and types.
+[v] Define the typing judgment (Inductive typing : context -> term -> type -> Prop := ...).
+[v] Define the evaluation judgment (Inductive step : state -> term -> state -> term -> Prop := ...).
+[v] Goal: State and attempt (even if manually) proofs for Type Preservation (if Γ ⊢ t : τ and ⟨t, σ⟩ ⟶ ⟨t', σ'⟩, then Γ ⊢ t' : τ) and Progress (if Γ ⊢ t : τ, then t is a value or there exists t', σ' such that ⟨t, σ⟩ ⟶ ⟨t', σ'⟩). These proofs are crucial for validating the semantics.
+[v] Review Point: Have a peer (or use the AI agent's analytical capabilities) review the rules for internal consistency, completeness (covering all defined syntax), and correctness according to PL theory standards. Ensure the proof assistant formalization matches the document.
 Task P0T2: ASG Schema Definition (v1)
 Goal: Define the concrete data structure (Abstract Semantic Graph) that will represent Synapse code in memory and on disk, ensuring it can capture the essence of the formal semantics.
 Input: Formal Semantics v0.1 (Task P0T1).
@@ -41,103 +41,103 @@ Output:
 Formal ASG schema definition file (schemas/asg_schema_v1.proto).
 Documentation explaining the schema (docs/asg_schema_v1_rationale.md).
 Instructions:
-[ ] Choose Schema Language: Confirm Protocol Buffers v3. Create the schemas/ directory if it doesn't exist.
-[ ] Define Core Structure: In asg_schema_v1.proto (with syntax = "proto3"; and a package declaration like package synapse.asg.v1;):
-[ ] message AsgGraph { repeated AsgNode nodes = 1; uint64 root_node_id = 2; // Optional entry point }
-[ ] message AsgNode { uint64 node_id = 1; NodeType type = 2; oneof content { TermVariable term_variable = 3; TermLambda term_lambda = 4; ... ; Metadata metadata = 50; } } (Use unique field numbers).
-[ ] Define enum NodeType { NODE_TYPE_UNSPECIFIED = 0; TERM_VARIABLE = 1; ... ; METADATA = 50; }
-[ ] Map Semantics to Schema: Define messages corresponding to each construct in the formal semantics (P0T1):
-[ ] TermVariable { string name = 1; uint64 definition_node_id = 2; /* Link to lambda binder or let binding */ }
-[ ] TermLambda { uint64 binder_variable_node_id = 1; uint64 body_node_id = 2; uint64 type_annotation_id = 3; /* Optional link to TypeNode */ }
-[ ] TermApplication { uint64 function_node_id = 1; uint64 argument_node_id = 2; }
-[ ] LiteralInt { int64 value = 1; }, LiteralBool { bool value = 1; }
-[ ] PrimitiveOp { string op_name = 1; repeated uint64 argument_node_ids = 2; }
-[ ] TypeNode { uint64 node_id = 1; TypeKind type_kind = 2; oneof content { TypeInt type_int = 3; ... } } (Mirror type structure from P0T1)
-[ ] TermRef { uint64 init_value_node_id = 1; }, TermDeref { uint64 ref_node_id = 1; }, TermAssign { uint64 ref_node_id = 1; uint64 value_node_id = 2; }
-[ ] EffectPerform { string effect_name = 1; uint64 value_node_id = 2; /* Node ID of the value passed to the effect */ }
-[ ] ProofObligation { uint64 node_id = 1; string description = 2; uint64 related_code_node_id = 3; enum Status { STATUS_PENDING = 0; STATUS_DISCHARGED = 1; STATUS_FAILED = 2; } status = 4; } // Placeholder for linking proofs later
-[ ] Metadata { uint64 node_id = 1; SourceLocation source_location = 2; repeated uint64 annotation_ids = 3; }
-[ ] SourceLocation { string filename = 1; uint32 start_line = 2; uint32 start_col = 3; uint32 end_line = 4; uint32 end_col = 5; }
-[ ] Design Decisions: Use uint64 for node IDs consistently. Use direct node ID references to represent graph edges. Store nodes in a flat list within AsgGraph.
-[ ] Best Practice (Formal Spec): Add comments directly in the .proto file explaining the purpose of each message and field, and how it relates to the formal semantics.
-[ ] Best Practice (Documentation): Create docs/asg_schema_v1_rationale.md. Explain why the ASG is structured this way (e.g., flat structure for easier querying/mutation, explicit node IDs for graph representation). Discuss alternatives considered.
-[ ] Review Point: Cross-reference every construct in the formal semantics with its representation in the ASG schema. Ensure all necessary connections (like variable definitions) can be represented. Check for potential ambiguities.
+[v] Choose Schema Language: Confirm Protocol Buffers v3. Create the schemas/ directory if it doesn't exist.
+[v] Define Core Structure: In asg_schema_v1.proto (with syntax = "proto3"; and a package declaration like package synapse.asg.v1;):
+[v] message AsgGraph { repeated AsgNode nodes = 1; uint64 root_node_id = 2; // Optional entry point }
+[v] message AsgNode { uint64 node_id = 1; NodeType type = 2; oneof content { TermVariable term_variable = 3; TermLambda term_lambda = 4; ... ; Metadata metadata = 50; } } (Use unique field numbers).
+[v] Define enum NodeType { NODE_TYPE_UNSPECIFIED = 0; TERM_VARIABLE = 1; ... ; METADATA = 50; }
+[v] Map Semantics to Schema: Define messages corresponding to each construct in the formal semantics (P0T1):
+[v] TermVariable { string name = 1; uint64 definition_node_id = 2; /* Link to lambda binder or let binding */ }
+[v] TermLambda { uint64 binder_variable_node_id = 1; uint64 body_node_id = 2; uint64 type_annotation_id = 3; /* Optional link to TypeNode */ }
+[v] TermApplication { uint64 function_node_id = 1; uint64 argument_node_id = 2; }
+[v] LiteralInt { int64 value = 1; }, LiteralBool { bool value = 1; }
+[v] PrimitiveOp { string op_name = 1; repeated uint64 argument_node_ids = 2; }
+[v] TypeNode { uint64 node_id = 1; TypeKind type_kind = 2; oneof content { TypeInt type_int = 3; ... } } (Mirror type structure from P0T1)
+[v] TermRef { uint64 init_value_node_id = 1; }, TermDeref { uint64 ref_node_id = 1; }, TermAssign { uint64 ref_node_id = 1; uint64 value_node_id = 2; }
+[v] EffectPerform { string effect_name = 1; uint64 value_node_id = 2; /* Node ID of the value passed to the effect */ }
+[v] ProofObligation { uint64 node_id = 1; string description = 2; uint64 related_code_node_id = 3; enum Status { STATUS_PENDING = 0; STATUS_DISCHARGED = 1; STATUS_FAILED = 2; } status = 4; } // Placeholder for linking proofs later
+[v] Metadata { uint64 node_id = 1; SourceLocation source_location = 2; repeated uint64 annotation_ids = 3; }
+[v] SourceLocation { string filename = 1; uint32 start_line = 2; uint32 start_col = 3; uint32 end_line = 4; uint32 end_col = 5; }
+[v] Design Decisions: Use uint64 for node IDs consistently. Use direct node ID references to represent graph edges. Store nodes in a flat list within AsgGraph.
+[v] Best Practice (Formal Spec): Add comments directly in the .proto file explaining the purpose of each message and field, and how it relates to the formal semantics.
+[v] Best Practice (Documentation): Create docs/asg_schema_v1_rationale.md. Explain why the ASG is structured this way (e.g., flat structure for easier querying/mutation, explicit node IDs for graph representation). Discuss alternatives considered.
+[v] Review Point: Cross-reference every construct in the formal semantics with its representation in the ASG schema. Ensure all necessary connections (like variable definitions) can be represented. Check for potential ambiguities.
 Task P0T3: Core ASG Libraries Implementation
 Goal: Create the foundational Rust code (the asg_core library) to build, manipulate, serialize, deserialize, and hash ASG instances based on the defined schema.
 Input: ASG Schema v1 (asg_schema_v1.proto), Bootstrap Language (Rust).
 Output: Rust library (asg_core) published locally (initially).
 Instructions:
-[ ] Setup Project:
-[ ] If not done: git init synapse && cd synapse
-[ ] cargo new asg_core --lib
-[ ] Configure Dependencies (asg_core/Cargo.toml):
-[ ] Add protobuf crate (or prost and prost-build if using Prost).
-[ ] Add serde (with derive feature) for potential JSON debugging/alternative serialization.
-[ ] Add a hashing crate: blake3 (recommended for speed) or sha2.
-[ ] If using prost-build, add it to [build-dependencies].
-[ ] Generate Rust Code from Schema:
-[ ] If using protobuf crate: Use protoc --rust_out asg_core/src/ schemas/asg_schema_v1.proto (requires protoc compiler installed).
-[ ] If using prost: Create a build.rs file in asg_core/ and use prost_build::compile_protos(&["../schemas/asg_schema_v1.proto"], &["../schemas/"])?;. Configure OUT_DIR mapping in src/lib.rs.
-[ ] Verify generated Rust structs/enums in asg_core/src/.
-[ ] Implement Core Graph Structure (asg_core/src/graph.rs):
-[ ] pub struct AsgGraph { nodes: std::collections::HashMap<u64, AsgNode>, next_id: std::sync::atomic::AtomicU64, // For generating unique IDs }
-[ ] Implement impl AsgGraph { ... } with methods:
-[ ] pub fn new() -> Self
-[ ] fn generate_id(&self) -> u64 (handles incrementing next_id safely).
-[ ] pub fn add_node(&mut self, content: AsgNodeContent) -> u64 (Generates ID, creates AsgNode, inserts into map).
-[ ] pub fn get_node(&self, node_id: u64) -> Option<&AsgNode>
-[ ] pub fn get_node_mut(&mut self, node_id: u64) -> Option<&mut AsgNode>
-[ ] Consider helper methods like get_lambda(&self, node_id: u64) -> Option<&TermLambda>, etc.
-[ ] Implement Serialization/Deserialization (asg_core/src/serde.rs):
-[ ] pub fn save_asg_binary<P: AsRef<std::path::Path>>(graph: &AsgGraph, path: P) -> Result<(), Error> (Use protobuf::Message::write_to_bytes or prost::Message::encode).
-[ ] pub fn load_asg_binary<P: AsRef<std::path::Path>>(path: P) -> Result<AsgGraph, Error> (Use protobuf::Message::parse_from_bytes or prost::Message::decode).
-[ ] (Optional) Implement JSON serialization/deserialization using serde and serde_json for debugging purposes. Derive Serialize, Deserialize on generated structs if possible (may require manual impls or prost features).
-[ ] Implement Content Addressing (asg_core/src/hash.rs):
-[ ] Define a HashDigest type alias (e.g., pub type HashDigest = [u8; 32]; for BLAKE3/SHA256).
-[ ] fn canonicalize_node(node: &AsgNode) -> Vec<u8>: Define a stable binary serialization specifically for hashing. Crucial: Must ignore volatile fields like node_id itself if not part of content, and handle map iteration order if hashing the whole graph. Hashing individual nodes based on their content and direct children's hashes is often more robust. Decide on a strategy and document it.
-[ ] pub fn hash_node(node: &AsgNode) -> HashDigest: Hash the output of canonicalize_node.
-[ ] Consider how to hash the entire graph consistently.
-[ ] Best Practice (Modularity): Create modules: graph.rs, nodes.rs (or use generated file), serde.rs, hash.rs, error.rs. Define custom error types.
-[ ] Best Practice (TDD/Testing): Create asg_core/tests/integration_tests.rs:
-[ ] Test node creation, retrieval, modification.
-[ ] Test serialization/deserialization round trip (binary and optional JSON). Check that loading a saved graph results in an identical structure.
-[ ] Test hashing: ensure hashing the same node content yields the same hash; ensure minor changes result in different hashes.
-[ ] Best Practice (Documentation): Add Rustdoc comments (///) explaining the purpose of structs, functions, and modules. Explain the hashing strategy clearly.
-[ ] Review Point: Check API design, serialization correctness, hashing stability and strategy. Ensure tests provide good coverage.
+[v] Setup Project:
+[v] If not done: git init synapse && cd synapse
+[v] cargo new asg_core --lib
+[v] Configure Dependencies (asg_core/Cargo.toml):
+[v] Add protobuf crate (or prost and prost-build if using Prost).
+[v] Add serde (with derive feature) for potential JSON debugging/alternative serialization.
+[v] Add a hashing crate: blake3 (recommended for speed) or sha2.
+[v] If using prost-build, add it to [build-dependencies].
+[v] Generate Rust Code from Schema:
+[v] If using protobuf crate: Use protoc --rust_out asg_core/src/ schemas/asg_schema_v1.proto (requires protoc compiler installed).
+[v] If using prost: Create a build.rs file in asg_core/ and use prost_build::compile_protos(&["../schemas/asg_schema_v1.proto"], &["../schemas/"])?;. Configure OUT_DIR mapping in src/lib.rs.
+[v] Verify generated Rust structs/enums in asg_core/src/.
+[v] Implement Core Graph Structure (asg_core/src/graph.rs):
+[v] pub struct AsgGraph { nodes: std::collections::HashMap<u64, AsgNode>, next_id: std::sync::atomic::AtomicU64, // For generating unique IDs }
+[v] Implement impl AsgGraph { ... } with methods:
+[v] pub fn new() -> Self
+[v] fn generate_id(&self) -> u64 (handles incrementing next_id safely).
+[v] pub fn add_node(&mut self, content: AsgNodeContent) -> u64 (Generates ID, creates AsgNode, inserts into map).
+[v] pub fn get_node(&self, node_id: u64) -> Option<&AsgNode>
+[v] pub fn get_node_mut(&mut self, node_id: u64) -> Option<&mut AsgNode>
+[v] Consider helper methods like get_lambda(&self, node_id: u64) -> Option<&TermLambda>, etc.
+[v] Implement Serialization/Deserialization (asg_core/src/serde.rs):
+[v] pub fn save_asg_binary<P: AsRef<std::path::Path>>(graph: &AsgGraph, path: P) -> Result<(), Error> (Use protobuf::Message::write_to_bytes or prost::Message::encode).
+[v] pub fn load_asg_binary<P: AsRef<std::path::Path>>(path: P) -> Result<AsgGraph, Error> (Use protobuf::Message::parse_from_bytes or prost::Message::decode).
+[v] (Optional) Implement JSON serialization/deserialization using serde and serde_json for debugging purposes. Derive Serialize, Deserialize on generated structs if possible (may require manual impls or prost features).
+[v] Implement Content Addressing (asg_core/src/hash.rs):
+[v] Define a HashDigest type alias (e.g., pub type HashDigest = [u8; 32]; for BLAKE3/SHA256).
+[v] fn canonicalize_node(node: &AsgNode) -> Vec<u8>: Define a stable binary serialization specifically for hashing. Crucial: Must ignore volatile fields like node_id itself if not part of content, and handle map iteration order if hashing the whole graph. Hashing individual nodes based on their content and direct children's hashes is often more robust. Decide on a strategy and document it.
+[v] pub fn hash_node(node: &AsgNode) -> HashDigest: Hash the output of canonicalize_node.
+[v] Consider how to hash the entire graph consistently.
+[v] Best Practice (Modularity): Create modules: graph.rs, nodes.rs (or use generated file), serde.rs, hash.rs, error.rs. Define custom error types.
+[v] Best Practice (TDD/Testing): Create asg_core/tests/integration_tests.rs:
+[v] Test node creation, retrieval, modification.
+[v] Test serialization/deserialization round trip (binary and optional JSON). Check that loading a saved graph results in an identical structure.
+[v] Test hashing: ensure hashing the same node content yields the same hash; ensure minor changes result in different hashes.
+[v] Best Practice (Documentation): Add Rustdoc comments (///) explaining the purpose of structs, functions, and modules. Explain the hashing strategy clearly.
+[v] Review Point: Check API design, serialization correctness, hashing stability and strategy. Ensure tests provide good coverage.
 Task P0T4: Minimal Parser & Pretty Printer Implementation
 Goal: Create tools to translate between a human-readable minimal text format and the ASG, enabling basic code input and inspection.
 Input: Core Semantics (P0T1), asg_core library (P0T3).
 Output: Rust libraries: parser_core, formatter_core.
 Instructions:
-[ ] Setup Projects:
-[ ] cargo new parser_core --lib
-[ ] cargo new formatter_core --lib
-[ ] Configure Dependencies: Add asg_core as a path dependency in both Cargo.toml files (e.g., asg_core = { path = "../asg_core" }).
+[v] Setup Projects:
+[v] cargo new parser_core --lib
+[v] cargo new formatter_core --lib
+[v] Configure Dependencies: Add asg_core as a path dependency in both Cargo.toml files (e.g., asg_core = { path = "../asg_core" }).
 Parser (parser_core):
-[ ] Choose Parsing Library: Recommendation: lalrpop. It requires a separate grammar file and integrates well with build scripts. Add lalrpop to [build-dependencies] and lalrpop-util to [dependencies].
-[ ] Define Concrete Syntax: Create parser_core/src/core_syntax.lalrpop. Define terminals (keywords like lambda, ref, operators) and non-terminals corresponding to semantic constructs (e.g., Term, Expr, Type). Use an S-expression like syntax for simplicity:
-[ ] Define Intermediate AST: Create parser_core/src/ast.rs. Define simple structs/enums that the parser actions in the .lalrpop file can easily build before constructing the complex AsgGraph. This decouples parsing logic from AsgGraph details.
-[ ] Implement LALRPOP Actions: Write Rust code within the .lalrpop actions (=> { ... }) to build the intermediate AST defined above.
-[ ] Implement AST -> ASG Conversion: Write a function pub fn build_asg(input_ast: ast::Root) -> Result<asg_core::AsgGraph, BuildError> in parser_core/src/lib.rs. This function traverses the intermediate AST and uses the asg_core library functions (graph.add_node(...)) to construct the final AsgGraph. Handle scoping and variable definition linking here.
-[ ] Configure Build Script: Create parser_core/build.rs to process the .lalrpop file.
-[ ] Error Handling: lalrpop provides error types. Map these to your custom ParseError type, including location information.
-[ ] Best Practice (Security): LALRPOP helps prevent some ambiguities. Be mindful of potential resource exhaustion (e.g., stack overflow) on deeply nested input during AST -> ASG conversion.
-[ ] Best Practice (TDD/Testing): In parser_core/tests/, write tests that:
+[v] Choose Parsing Library: Recommendation: lalrpop. It requires a separate grammar file and integrates well with build scripts. Add lalrpop to [build-dependencies] and lalrpop-util to [dependencies].
+[v] Define Concrete Syntax: Create parser_core/src/core_syntax.lalrpop. Define terminals (keywords like lambda, ref, operators) and non-terminals corresponding to semantic constructs (e.g., Term, Expr, Type). Use an S-expression like syntax for simplicity:
+[v] Define Intermediate AST: Create parser_core/src/ast.rs. Define simple structs/enums that the parser actions in the .lalrpop file can easily build before constructing the complex AsgGraph. This decouples parsing logic from AsgGraph details.
+[v] Implement LALRPOP Actions: Write Rust code within the .lalrpop actions (=> { ... }) to build the intermediate AST defined above.
+[v] Implement AST -> ASG Conversion: Write a function pub fn build_asg(input_ast: ast::Root) -> Result<asg_core::AsgGraph, BuildError> in parser_core/src/lib.rs. This function traverses the intermediate AST and uses the asg_core library functions (graph.add_node(...)) to construct the final AsgGraph. Handle scoping and variable definition linking here.
+[v] Configure Build Script: Create parser_core/build.rs to process the .lalrpop file.
+[v] Error Handling: lalrpop provides error types. Map these to your custom ParseError type, including location information.
+[v] Best Practice (Security): LALRPOP helps prevent some ambiguities. Be mindful of potential resource exhaustion (e.g., stack overflow) on deeply nested input during AST -> ASG conversion.
+[v] Best Practice (TDD/Testing): In parser_core/tests/, write tests that:
 Parse valid code snippets and check the resulting AsgGraph structure (or intermediate AST).
 Parse invalid code snippets and verify that the correct ParseError is returned with accurate location info.
 Formatter (formatter_core):
-[ ] Implement Core Logic (formatter_core/src/lib.rs):
-[ ] pub fn format_asg(graph: &asg_core::AsgGraph, root_id: u64) -> Result<String, FormatError>
-[ ] Implement a recursive function that traverses the ASG starting from root_id.
-[ ] Use a PrettyPrinter helper struct to manage indentation levels and the output string buffer.
-[ ] Pattern match on AsgNode content and recursively call formatting for child nodes, printing parentheses, keywords, and literals according to the defined minimal concrete syntax.
-[ ] Handle potential cycles if the graph allows them (though the core language shouldn't have term cycles).
-[ ] Best Practice (TDD/Testing): In formatter_core/tests/:
+[v] Implement Core Logic (formatter_core/src/lib.rs):
+[v] pub fn format_asg(graph: &asg_core::AsgGraph, root_id: u64) -> Result<String, FormatError>
+[v] Implement a recursive function that traverses the ASG starting from root_id.
+[v] Use a PrettyPrinter helper struct to manage indentation levels and the output string buffer.
+[v] Pattern match on AsgNode content and recursively call formatting for child nodes, printing parentheses, keywords, and literals according to the defined minimal concrete syntax.
+[v] Handle potential cycles if the graph allows them (though the core language shouldn't have term cycles).
+[v] Best Practice (TDD/Testing): In formatter_core/tests/:
 Create AsgGraph instances programmatically.
 Format them and assert the output matches the expected string exactly.
 Round-trip Test: Combine with parser_core. Parse a string -> Format the resulting ASG -> Assert the output string matches the original input string (or a canonical formatted version).
-[ ] Best Practice (Documentation): Document the concrete syntax expected by the parser and generated by the formatter. Explain the AST -> ASG conversion logic.
-[ ] Review Point: Check parser correctness and error reporting. Verify formatter output matches the defined syntax. Ensure round-trip tests pass.
+[v] Best Practice (Documentation): Document the concrete syntax expected by the parser and generated by the formatter. Explain the AST -> ASG conversion logic.
+[v] Review Point: Check parser correctness and error reporting. Verify formatter output matches the defined syntax. Ensure round-trip tests pass.
 Task P0T5: Basic CLI & Linter (Level 0) Implementation
 Goal: Create the main user interface tool (synapse_cli) integrating the parser, formatter, and adding basic (Level 0) structural validation of the ASG.
 Input: asg_core, parser_core, formatter_core libraries.
@@ -635,7 +635,7 @@ Add verification.* metadata based on proof obligation status attached to ASG nod
 [ ] Review Point: Verify that the lowering pass correctly translates the advanced type system information into the corresponding UPIR dialect representations.
 Task P2T7: Verification of Advanced Checkers (Soundness Sketch/Approach)
 Goal: Extend the formal soundness proof efforts (from P1T7) to cover the core logic of the Level 2 (Quantitative/Effect) and Level 3 (Dependent Core) checkers against the extended formal semantics.
-Input: Extended Formal Semantics v1.0 + Proofs (P2T1), type_checker_l2/l3 implementation logic.
+Input: Extended Formal Semantics v1.0 + Proofs (P2T1+), type_checker_l2/l3 implementation logic.
 Output: Extended formal proofs or at least detailed proof sketches (proofs/semantics/type_checker_l2_soundness.v, ..._l3_...).
 Instructions:
 [ ] Model Checker Logic: Extend the proof assistant model to include linearity/affinity tracking, effect calculation, and basic dependent type checking logic (including the SMT oracle).
