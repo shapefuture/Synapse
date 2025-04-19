@@ -1,14 +1,22 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+//! Level 1 Type Checker for Synapse ASG
+//!
+//! Implements Hindley-Milner style type inference and annotates
+//! ASG nodes with inferred type information.
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+mod types;
+mod unification;
+mod inference;
+mod errors;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub use types::{Type, TypeScheme};
+pub use errors::{TypeError, Result as TypeCheckResult};
+
+use asg_core::AsgGraph;
+
+/// The main entrypoint for type checking: checks and annotates the graph.
+///
+/// Returns `Ok(())` if type checking succeeds, otherwise a vector of type errors.
+pub fn check_and_annotate_graph(graph: &mut AsgGraph) -> TypeCheckResult<()> {
+    // This is a stub; real implementation forthcoming
+    Ok(())
 }
