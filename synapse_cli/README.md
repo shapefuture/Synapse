@@ -1,137 +1,123 @@
-# Synapse CLI
+# synapse_cli
 
-Command-line interface for the Synapse programming language.
+Command-line interface for the Synapse language:
+- Parsing, formatting, linting, and introspecting Synapse source files (ASG-based).
 
-## Overview
+## Features
 
-The Synapse CLI provides a set of tools for working with Synapse source files, including parsing, formatting, linting, and ASG (Abstract Semantic Graph) manipulation.
+- **parse**: Parse Synapse minimal source and check for syntax errors.
+- **format**: Pretty-print Synapse code in canonical minimal syntax.
+- **lint**: Lint for structural errors (ASG well-formedness, scope, basic type anomalies).
+- **dump-asg**: Output the parsed ASG in binary or JSON format for inspection/tooling.
 
 ## Installation
 
-### Prerequisites
-
-- Rust toolchain (stable)
-- Protobuf compiler (protoc)
-
-### Building
-
-```bash
-# From the root of the Synapse repository
-cargo build -p synapse_cli --release
-
-# The binary will be available at target/release/synapse_cli
+Recommended workflow: build in a Rust workspace with all foundational Synapse crates (see root README).
+```
+cargo build -p synapse_cli
 ```
 
 ## Usage
 
 ```
-synapse_cli [SUBCOMMAND]
+synapse_cli <COMMAND> [OPTIONS]
 ```
 
 ### Subcommands
 
-#### Parse
+#### `parse INPUT_FILE`
 
-Parse a Synapse source file and validate its structure.
-
-```bash
-synapse_cli parse <INPUT_FILE>
-```
+Parse the provided Synapse source file. Reports `Parse successful` or prints an error.
 
 Example:
-```bash
-synapse_cli parse examples/function.syn
+```
+synapse_cli parse examples/add.syn
 ```
 
-#### Format
+#### `format INPUT_FILE [-o OUTPUT_FILE]`
 
-Format a Synapse source file according to the language's style guidelines.
-
-```bash
-synapse_cli format <INPUT_FILE> [-o <OUTPUT_FILE>]
-```
-
-If no output file is specified, the formatted code is printed to stdout.
+Parse and pretty-print (normalize) the input file. Output to stdout by default, or to specified file.
 
 Example:
-```bash
-# Format and save to a new file
-synapse_cli format examples/function.syn -o examples/function_formatted.syn
-
-# Format and print to console
-synapse_cli format examples/function.syn
+```
+synapse_cli format examples/add.syn
 ```
 
-#### Lint
+#### `lint INPUT_FILE`
 
-Perform Level 0 (structural) linting on a Synapse source file.
+Runs Level 0 structural linting on the input file:
+- Confirms all referenced node IDs exist in ASG.
+- Checks TermVariable nodes point to valid definitions in scope.
+- Warns about obvious application/assignment errors (e.g., applying a non-lambda).
 
-```bash
-synapse_cli lint <INPUT_FILE>
-```
-
-The linter checks for:
-- Graph structural integrity (references to non-existent nodes)
-- Variable scoping issues
-- Simple type mismatches detectable without full type inference
+Returns:
+- Success if no errors, or prints them with error code, message, and node/location.
 
 Example:
-```bash
-synapse_cli lint examples/function.syn
+```
+synapse_cli lint examples/add.syn
 ```
 
-#### Dump ASG
+#### `dump-asg INPUT_FILE [--format {binary,json}]`
 
-Dump the Abstract Semantic Graph (ASG) of a Synapse source file in binary or JSON format.
+Parses and prints the underlying ASG as binary (protobuf) or pretty JSON.
 
-```bash
-synapse_cli dump-asg <INPUT_FILE> [--format <FORMAT>] [-o <OUTPUT_FILE>]
+Example:
+```
+synapse_cli dump-asg examples/add.syn --format json
 ```
 
-Options:
-- `--format`: Output format, either `binary` (default) or `json`
-- `-o, --output-file`: Output file path (required for binary format)
+## Lint Error Codes
 
-Examples:
-```bash
-# Dump as binary
-synapse_cli dump-asg examples/function.syn -o function.asg
+- `L001`: Reference integrity error (node/edge points to missing node)
+- `L002`: Scope error (TermVariable points to non-existent/invalid binder)
+- `L003`: Application error (application of non-lambda value)
+- `L004`: Assignment error (assigning to a non-reference)
+- _Additional codes to be added as linter evolves_
 
-# Dump as JSON to file
-synapse_cli dump-asg examples/function.syn --format json -o function.json
+Each error includes:
+- Error code
+- Explanation message
+- Offending node ID
+- Source location (if available)
 
-# Dump as JSON to stdout
-synapse_cli dump-asg examples/function.syn --format json
-```
+## Error Handling
 
-## Error Codes
+All commands use robust error reporting: parse/format/lint failures print user-friendly messages. Linter errors are non-fatal but yield exit code 2.
 
-### Lint Error Codes
+For development details, see `src/main.rs` and `src/linter.rs`.
 
-- `L001`: Root node not found in graph
-- `L002`: Variable references non-existent definition node
-- `L003`: Lambda references non-existent binder node
-- `L004`: Lambda references non-existent body node
-- `L005`: Lambda references non-existent type annotation node
-- `L006`: Application references non-existent function node
-- `L007`: Application references non-existent argument node
-- `L008`: Variable references definition node not in scope
-- `L009`: Cannot apply arguments to a non-function value
-- `L010`: Cannot dereference a non-reference value
-- `L011`: Left-hand side of assignment must be a reference or variable
+## Development & Testing
 
-## Development
-
-### Running Tests
+### Running tests
 
 ```bash
-# From the root of the Synapse repository
 cargo test -p synapse_cli
 ```
 
-### Adding New Commands
+Tests include CLI end-to-end cases for parsing, formatting, linting, and dump-asg with valid/invalid inputs.
 
-1. Add the command to the `Commands` enum in `main.rs`
-2. Implement the command's logic in a separate function
-3. Add the function call to the match expression in `main()`
-4. Add tests for the new command in `cli_tests.rs`
+### Adding tests
+
+- See `tests/cli_tests.rs` (integration tests).
+- Add `.syn` source files in a `tests/data/` directory to exercise linter/format tests.
+
+### Dependencies
+
+- `clap` (CLI arg parsing)
+- `thiserror` & `anyhow` (error handling)
+- `asg_core`, `parser_core`, `formatter_core` (local crates)
+- `serde_json` (ASG JSON dump)
+
+## Roadmap
+
+- Advanced linter checks, type inference, compilation pipeline (future subcommands)
+- See [plan.md](../plan.md) for overall language/compiler development plan
+
+## See Also
+
+- [asg_core](../asg_core/)
+- [parser_core](../parser_core/)
+- [formatter_core](../formatter_core/)
+
+---

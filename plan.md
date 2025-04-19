@@ -1402,5 +1402,69 @@ Practices:
     *   `[ ]` **Document Patterns:** Document common patterns for working with linear/affine types effectively (e.g., passing ownership, borrowing, structured deallocation).
 
 ---
+---
+
+## Extension: Additional Best Practices & Considerations for AI Implementation (Based on Aurora Language Proposal Analysis)
+
+Context: Analyzing the goals and features of the proposed "Aurora" language highlights alternative approaches and useful features that can inform Synapse's development, ensuring robustness, flexibility, and addressing potential gaps.
+
+### T. Enhance Metaprogramming with Compile-Time Execution
+
+*   Goal: Increase the power and flexibility of Synapse's metaprogramming capabilities, inspired by Aurora's Lisp/Terra influence.
+*   Aurora Idea: Macros + compile-time codegen (Terra-like).
+*   Synapse Integration:
+    *   [ ] Explicitly Enhance P3T6 (Metaprogramming Framework): Design the metaprogramming system not just for macro expansion but also to support secure, sandboxed compile-time function execution (CTFE). Allow pure Synapse functions (verified for termination and limited effects) operating on ASG data or other compile-time values to run during compilation, enabling more sophisticated code generation, specialization, and static configuration, similar to Terra's approach but integrated with Synapse's type/verification system. Document the CTFE capabilities and limitations.
+
+### U. Introduce UART Compilation Profiles (Incl. Embeddability)
+
+*   Goal: Address the need for different runtime footprints, particularly for embedding scenarios, inspired by Aurora's "Light" vs "Max" runtimes and Lua's embeddability.
+*   Aurora Idea: Separate lightweight, embeddable runtime (<500KB).
+*   Synapse Integration:
+    *   [ ] Define UART Profiles (Modify P4T3): Instead of separate runtimes, introduce compilation profiles for the UART. Add a task to design and implement these profiles via compiler flags (e.g., --uart-profile=full | embedded).
+    *   [ ] **Implement embedded Profile:** This profile should configure the build to:
+        *   Disable or provide minimal stub implementations for heavier UART features (e.g., advanced adaptive scheduling, JIT hooks, complex PGO collection, potentially some dynamic effect handlers if alternatives exist).
+        *   Aggressively optimize for code size and minimal external dependencies.
+        *   Target a small binary footprint suitable for WASM or embedding via C FFI (P4T4).
+    *   [ ] **Benchmark Profile Size/Features:** Add tests/benchmarks to track the binary size and feature set difference between UART profiles.
+
+### V. Explore Automatic Parallelism ResearGoal:*Goal:** Keep abreast of techniques for automatic parallelization, as highlighted by Aurora's Futhark inspiration, even if not a primary initial focus for Synapse's explicit concurrency model (ActorAurora Idea: Idea:** Futhark-like automatic paralleliSynapse Integration:ation:**
+    *   [ ] **Enhance P5T6 (Continuous Research Integration):** Exp"Automatic Parallelization Techniques"echniques"** (like Futhark's functional data parallelism on arrays) to the list of research areas to monitor.
+    *   [ ] **Investigate Type System Synergy:** Explore how Synapse's type system (Quantitative, Effect) could potentially *aid* or *verify* automatic parallelization transforms applied at the UPIR level in the future. Document findings in RESEARCH_IDEAS.md.
+
+### W. Prioritize Native Cloud/Network StandardGoal:s
+
+*   **Goal:** Achieve practical usability for cloud-native development similar to Aurora's Ballerina inspiration, but through native libraries rather than built-in languagAurora Idea:**Aurora Idea:** Built-in Kafka/gRPC/GraphQL Synapse Integration:e Integration:**
+    *   [ ] **Refine Sec K (Standard Library Strategy):** Explicitly prioritize the development of high-quality, *native* Synapse standard libraries (built using Synapse itself) for:
+        *   Core networking (TCP/UDP sockets via effects).
+        *   HTTP/1.1 & HTTP/2 client/server primitives.
+        *   gRPC client/server implementation.
+        *   Serialization formats (JSON, Protobuf).
+    *   [ ] **Apply Verification:** Ensure these standard network libraries leverage Synapse's verification features (resource management, effect tracking, potentially basic security properties) for robustness.
+
+### X. Reaffirm GC Avoidance StrGoal:. Toggle)
+
+*   **Goal:** Clarify Synapse's approach to memory management in contrast to Aurora's Aurora Idea:le.
+*   **Aurora Idea:** Ownership system + GC toggle (@safe mode).
+*   **Synapse Integration:**
+    *   [ ] **Update DESIGN_LOG.md:** Explicitly document the decision to *avoid* a runtime GC togglQuantitative Types (P2T2) for compile-time memory safety and resource managementsafety and resource management** as the primary mechanism, aiming to eliminate the need for a traditional GC in most safe code. unsafe blocks (Sec J) provide the escape hatch for manual memory management when required. This aligns better with the "Verifiability First" principle than a switchable GC.
+
+### Y. Investigate Ecosystem CompaGoal:Layers (Optional)
+
+*   **Goal:** Pragmatically address ecosystem integration challenges, inspired by Aurora's npm compatibility goal, without coAurora Idea:principles.
+*   **Aurora Idea:** npm compatiSynapse Integration:er.
+*   **Synapse Integration:**
+    *   [ ] **Explore Optional Tooling (Post P4T7):** Add a future investigation task (potentially Phase 5) to explore developing *optional, separate* tools or synapse_pkg plugins that could:
+        *   Facilitate using Synapse code compiled to WASM within Node.js/Bun environments.
+        *   Provide automated assistance for generating robust FFI wrappers (P4T4) for specific popular libraries (e.g., Python ML stack, common Node.js Maintain Core Focus:M).
+    *   **Maintain Core Focus:** Emphasize that the *core* synapse_pkg focus remains on content-addressing and verified SemVer for native Synapse packages. Compatibility layers are secondary, best-effort additions.
+
+### Goal: MLIR-Aware Debugging
+
+*   **Goal:** Guarantee that the debugging experience effectively supports the MLIR-based compilation strategy, especiAurora Idea:e acceleration.
+*   **Aurora Idea:** MLIR-awaSynapse Integration:ernels.
+*   **Synapse Integration:**
+    *   [ ] **Add Explicit Requirement to P4T1 (Holographic Debugger):** Mandate that the synapse_debugger quermust and state reconstruction logic **must** be able to correlate runtiUPIR operations, blocks, and dialect informationtions, blocks, and dialect information**, particularly when debugging code lowered through hardware acceleration dialects (GPU, TPU). This requires the compiler backend (e.g., upir_to_llvm, upir_to_spirv) to embed necessary mapping metadata during compi(End of Extension)is enabled.
+
+---
 
 **(End of Extension)**
