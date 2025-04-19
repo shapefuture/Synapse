@@ -2,15 +2,17 @@
 name = "synapse_cli"
 version = "0.1.0"
 edition = "2021"
-description = "Command-line interface for the Synapse language"
-authors = ["Synapse Team"]
+authors = ["Synapse Language Team"]
 
 [dependencies]
 asg_core = { path = "../asg_core" }
 parser_core = { path = "../parser_core" }
 formatter_core = { path = "../formatter_core" }
-clap = { version = "4.3", features = ["derive"] }
-thiserror = "1.0"
-anyhow = "1.0"
-serde_json = "1.0"
-colored = "2.0"
+clap = { version = "4", features = ["derive"] }
+thiserror = "1"
+anyhow = "1"
+serde_json = "1" # for DumpAsg JSON
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "3"
