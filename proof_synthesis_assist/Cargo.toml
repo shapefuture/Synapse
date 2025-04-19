@@ -1,0 +1,8 @@
+[package]
+name = "proof_synthesis_assist"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+asg_core = { path = "../asg_core" }
+proof_manager = { path = "../proof_manager" }

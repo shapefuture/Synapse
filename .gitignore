@@ -1,13 +1,29 @@
+# Rust build artifacts
+/target/
+**/target/
+Cargo.lock
 
+# Generated files
+**/*.rs.bk
+synapse_ai_api/protos/
+
+# IDE files
+.vscode/
+.idea/
+*.iml
 *.swp
-*.swo
-# rustfmt backup files
-*.bk
-*.bak
-*.rs.fmt
+*~
 
-*.bak
+# OS specific files
+.DS_Store
+Thumbs.db
 
-target
+# Documentation build artifacts
+docs/**/*.aux
+docs/**/*.log
+docs/**/*.out
+docs/**/*.pdf
+docs/**/*.synctex.gz
 
-.vscode
+# Test artifacts
+tests/e2e/tmp/

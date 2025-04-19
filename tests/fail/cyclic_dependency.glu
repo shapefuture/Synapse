@@ -1,3 +1,0 @@
-// ERROR Module 'tests.fail.cyclic_dependency' occurs in a cyclic dependency: `tests.fail.cyclic_dependency -> tests.fail.deps.cyclic_dependency2 -> tests.fail.cyclic_dependency`
-let c  = import! "tests/fail/deps/cyclic_dependency2.glu"
-in 1

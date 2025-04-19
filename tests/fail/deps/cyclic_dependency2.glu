@@ -1,2 +1,0 @@
-let c  = import! "tests/fail/cyclic_dependency.glu"
-in 1

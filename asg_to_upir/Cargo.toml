@@ -1,0 +1,8 @@
+[package]
+name = "asg_to_upir"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+asg_core = { path = "../asg_core" }
+upir_core = { path = "../upir_core" }

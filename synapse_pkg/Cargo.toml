@@ -1,0 +1,9 @@
+[package]
+name = "synapse_pkg"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+asg_core = { path = "../asg_core" }
+upir_core = { path = "../upir_core" }
+synapse_runtime = { path = "../synapse_runtime" }

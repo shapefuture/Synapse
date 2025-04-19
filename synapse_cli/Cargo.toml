@@ -1,0 +1,11 @@
+[package]
+name = "synapse_cli"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+asg_core = { path = "../asg_core" }
+parser_core = { path = "../parser_core" }
+formatter_core = { path = "../formatter_core" }
+type_checker_l1 = { path = "../type_checker_l1" }
+synapse_runtime = { path = "../synapse_runtime" }

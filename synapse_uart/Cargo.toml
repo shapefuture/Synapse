@@ -1,0 +1,7 @@
+[package]
+name = "synapse_uart"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+synapse_runtime = { path = "../synapse_runtime" }

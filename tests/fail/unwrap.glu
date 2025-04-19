@@ -1,4 +1,0 @@
-// ERROR Option was None
-let { Option, unwrap }  = import! std.option
-
-unwrap None

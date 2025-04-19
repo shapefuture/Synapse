@@ -1,0 +1,7 @@
+[package]
+name = "synapse_runtime"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+upir_core = { path = "../upir_core" }

@@ -1,2 +1,0 @@
-let { lift } = import! std.effect.lift
-lift_io! lift (import! std.io)

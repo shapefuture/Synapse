@@ -1,0 +1,9 @@
+[package]
+name = "type_checker_l3_core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+asg_core = { path = "../asg_core" }
+type_checker_l1 = { path = "../type_checker_l1" }
+type_checker_l2 = { path = "../type_checker_l2" }

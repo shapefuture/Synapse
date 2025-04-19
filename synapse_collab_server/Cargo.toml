@@ -1,0 +1,8 @@
+[package]
+name = "synapse_collab_server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+asg_core = { path = "../asg_core" }
+parser_core = { path = "../parser_core" }

@@ -1,38 +1,64 @@
-# Contributing to Gluon
+# Contributing to Synapse
 
-## Filing bug reports
+Thank you for your interest in contributing to the Synapse programming language project! This document provides guidelines for contributing to the project.
 
-It does not matter if you found a soundness issue in typechecker or found the documentation confusing. Either way filing an issue to the [issue tracker][] is extremely helpful.
+## Code Style
 
-[issue tracker]:https://github.com/gluon-lang/gluon/issues
+- Follow the Rust style guide and use `rustfmt` for formatting
+- Use meaningful variable and function names
+- Write comprehensive documentation comments (///) for public APIs
+- Include unit tests for all new functionality
 
-## Finding something to work on
+## Development Workflow
 
-A good place to start is to look at the issues marked as [beginner][]. These are issues that should be possible to work on without knowledge on the inner workings of Gluon.
+1. **Task Selection**: Choose a task from the implementation plan (`plan.md`)
+2. **Branch Creation**: Create a branch with a descriptive name (e.g., `feat/p0t3-asg-core-implementation`)
+3. **Implementation**: Implement the feature or fix the bug
+4. **Testing**: Write tests to verify your implementation
+5. **Documentation**: Update documentation as needed
+6. **Pull Request**: Submit a pull request with a clear description of the changes
 
-If you find something that looks interesting, please leave a comment on the issue. That way, you can get assistance quicker and there is no risk of duplicating work.
+## Commit Messages
 
-[beginner]:https://github.com/gluon-lang/gluon/labels/Beginner
+Use the following format for commit messages:
 
-## Building
+```
+feat(P0T3): Implement ASG serialization
 
-Gluon can build with version 1.9.0 of Rust or later but we recommend version 1.11.0 or later to avoid some very long compile times for the `gluon_parser` crate.
+- Add binary serialization using Protocol Buffers
+- Add JSON serialization for debugging
+- Add tests for round-trip serialization
+```
 
-## Testing
+Where the prefix indicates the type of change:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `test`: Adding or modifying tests
+- `refactor`: Code refactoring
+- `perf`: Performance improvements
+- `chore`: Maintenance tasks
 
-To build and run all(*) tests for Gluon you can call `cargo test --features test --all`. Instead of `--all` you can pass the `-p <crate name>` and `--test <test module>` flags to compile a specific crate and/or test module. For instance, `cargo test --features test -p gluon_parser --test basic` to run the tests in [parsers/tests/basic.rs](https://github.com/gluon-lang/gluon/blob/master/parser/tests/basic.rs).
+And the parenthesized tag indicates the task ID from the implementation plan.
 
-(*) You can see what Github actions actually builds and tests in [scripts/ci.sh](https://github.com/gluon-lang/gluon/blob/master/scripts/ci.sh). Most of the time you should not need to worry about these additional tests and can just rely on CI running them.
+## Pull Request Process
 
-## Pull requests
+1. Ensure all tests pass
+2. Update documentation as needed
+3. Request review from at least one maintainer
+4. Address review comments
+5. Once approved, a maintainer will merge the PR
 
-Once you have made some changes, you will need to file a pull request to get your changes merged into the main repository. If the code is still a work in progress, it can still be a good idea to submit a PR. That will let other contributors see your progress and provide assistance (you may prefix the PR message with [WIP] to make it explicit that the PR is incomplete).
+## Code of Conduct
 
-You may see that some of the [commits][] follow the [commit message convention of Angular][]. Following this convention is optional but if you enjoy using it, feel free to do so!
+- Be respectful and inclusive
+- Focus on constructive feedback
+- Assume good intentions
+- Help others learn and grow
 
-[commits]:https://github.com/gluon-lang/gluon/commit/9b36d699c63e482969239ed9f84779f7cd1ad2f3
-[commit message convention of Angular]:https://github.com/angular/angular.js/blob/master/CONTRIBUTING.md#commit-message-format
+## Getting Help
 
-## Releases
-
-Releases are done by running `./scripts/release.sh <patch|minor|major> <new-version>` on a branch and making a PR. After the PR is merged and has passed CI `git push --tags` will make CI publish the new version.
+If you need help with your contribution, feel free to:
+- Open an issue with questions
+- Ask for clarification in an existing issue
+- Reach out to the maintainers

@@ -1,0 +1,8 @@
+[package]
+name = "aspe_pythonic_v1"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+asg_core = { path = "../asg_core" }
+parser_core = { path = "../parser_core" }

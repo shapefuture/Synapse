@@ -1,8 +1,0 @@
-//! Green threading library.
-
-let prim = import! std.thread.prim
-
-{
-    ..
-    prim
-}
