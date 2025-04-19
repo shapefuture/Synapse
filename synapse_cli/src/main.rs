@@ -1,134 +1,210 @@
-/// Synapse CLI: User interface for the Synapse compiler & tools.
-/// 
-/// Subcommands: parse, format, lint, dump-asg.
-/// Structure and logic aligned with the Synapse implementation plan.
+//! Synapse CLI: Command-line interface for the Synapse language.
+//! 
+//! Provides subcommands for parsing, formatting, linting, and inspecting
+//! Synapse source code using the Abstract Semantic Graph (ASG).
 
-mod linter;
-
-use std::fs::File;
-use std::io::{self, Read, Write};
+use std::fs;
+use std::io::{self, Write};
 use std::path::PathBuf;
-use clap::{Parser, Subcommand, ValueEnum};
+use std::process;
+
+use anyhow::{Context, Result};
+use clap::{Parser, Subcommand};
+use colored::Colorize;
+use fs_err as fs;
 
 use asg_core::AsgGraph;
-use parser_core;
-use formatter_core;
+use parser_core::parse_text;
+use formatter_core::format_asg;
+
+mod linter;
 use linter::{lint_graph, LintError};
 
+/// Synapse language compiler and toolchain
 #[derive(Parser)]
-#[command(
-    name = "synapse_cli",
-    about = "Command line interface for the Synapse language.",
-    version,
-    author
-)]
+#[clap(author, version, about, long_about = None)]
 struct Cli {
-    #[command(subcommand)]
+    #[clap(subcommand)]
     command: Commands,
 }
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Parse a Synapse source file and check for syntax errors
+    /// Parse Synapse source and check for syntax errors
     Parse {
+        /// Input file to parse
         input_file: PathBuf,
     },
-    /// Pretty-print Synapse source file with canonical formatting
+    
+    /// Format Synapse code in canonical form
     Format {
+        /// Input file to format
         input_file: PathBuf,
-        /// Write output to file instead of stdout
-        #[arg(short, long)]
+        
+        /// Output file (defaults to stdout if not provided)
+        #[clap(short, long)]
         output_file: Option<PathBuf>,
     },
-    /// Lint a source file for structural and semantic issues
+    
+    /// Lint Synapse code for structural errors
     Lint {
+        /// Input file to lint
         input_file: PathBuf,
     },
-    /// Dump the ASG (Abstract Semantic Graph) in binary or JSON
+    
+    /// Dump the ASG in binary or JSON format
     DumpAsg {
+        /// Input file to dump ASG for
         input_file: PathBuf,
-        #[arg(long, value_enum, default_value_t = DumpFormat::Binary)]
+        
+        /// Output format
+        #[clap(long, arg_enum, default_value = "json")]
         format: DumpFormat,
     },
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(clap::ArgEnum, Clone)]
 enum DumpFormat {
     Binary,
     Json,
 }
 
-fn main() -> anyhow::Result<()> {
+fn main() -> Result<()> {
     let cli = Cli::parse();
 
-    match cli.command {
+    match &cli.command {
         Commands::Parse { input_file } => {
-            let src = std::fs::read_to_string(&input_file)?;
-            match parser_core::parse_str(&src) {
-                Ok(_graph) => {
-                    println!("Parse successful: {input_file:?}");
-                    Ok(())
-                }
-                Err(err) => {
-                    eprintln!("Parse failed:\n{err}");
-                    std::process::exit(1);
-                }
-            }
-        }
+            handle_parse(input_file)
+        },
         Commands::Format { input_file, output_file } => {
-            let src = std::fs::read_to_string(&input_file)?;
-            let graph = parser_core::parse_str(&src)
-                .map_err(|e| anyhow::anyhow!("Parse failed: {e}"))?;
-            let formatted = formatter_core::format_asg(&graph, graph.root_id())
-                .map_err(|e| anyhow::anyhow!("Formatting failed: {e}"))?;
-            match output_file {
-                Some(outfile) => {
-                    std::fs::write(&outfile, formatted)?;
-                }
-                None => {
-                    print!("{formatted}");
-                }
-            }
-            Ok(())
-        }
+            handle_format(input_file, output_file)
+        },
         Commands::Lint { input_file } => {
-            let src = std::fs::read_to_string(&input_file)?;
-            let graph = parser_core::parse_str(&src)
-                .map_err(|e| anyhow::anyhow!("Parse failed: {e}"))?;
-            let warnings = lint_graph(&graph);
-            if warnings.is_empty() {
-                println!("No lint errors found.");
-                Ok(())
-            } else {
-                for e in &warnings {
-                    eprintln!("[{}] {} (node_id={})", e.code, e.message, e.node_id);
-                    if let Some(loc) = &e.source_location {
-                        eprintln!("  at {}:{}-{}:{}", loc.filename, loc.start_line, loc.end_line, loc.end_col);
-                    }
-                }
-                std::process::exit(2);
-            }
-        }
+            handle_lint(input_file)
+        },
         Commands::DumpAsg { input_file, format } => {
-            let src = std::fs::read_to_string(&input_file)?;
-            let graph = parser_core::parse_str(&src)
-                .map_err(|e| anyhow::anyhow!("Parse failed: {e}"))?;
-            match format {
-                DumpFormat::Binary => {
-                    let out: Vec<u8> = asg_core::serialize_to_binary(&graph)
-                        .map_err(|e| anyhow::anyhow!("ASG binary serialization error: {e}"))?;
-                    // Write to stdout as binary
-                    let mut stdout = io::stdout();
-                    stdout.write_all(&out)?;
-                }
-                DumpFormat::Json => {
-                    // Optionally, implement JSON serialization if available in asg_core.
-                    let json = serde_json::to_string_pretty(&graph)
-                        .map_err(|e| anyhow::anyhow!("ASG JSON serialization error: {e}"))?;
-                    println!("{json}");
-                }
-            }
+            handle_dump_asg(input_file, format)
+        },
+    }
+}
+
+fn handle_parse(input_file: &PathBuf) -> Result<()> {
+    let source = fs::read_to_string(input_file)
+        .with_context(|| format!("Failed to read input file: {}", input_file.display()))?;
+    
+    match parse_text(&source) {
+        Ok(_) => {
+            println!("{}", "Parse successful.".green());
             Ok(())
+        },
+        Err(err) => {
+            eprintln!("{}: {}", "Parse error".bright_red(), err);
+            process::exit(1);
         }
+    }
+}
+
+fn handle_format(input_file: &PathBuf, output_file: &Option<PathBuf>) -> Result<()> {
+    // Read the input file
+    let source = fs::read_to_string(input_file)
+        .with_context(|| format!("Failed to read input file: {}", input_file.display()))?;
+    
+    // Parse the source into an ASG
+    let asg = parse_text(&source)
+        .with_context(|| format!("Failed to parse input file: {}", input_file.display()))?;
+    
+    // Format the ASG back to text
+    let formatted = format_asg(&asg, asg.root_node_id())
+        .with_context(|| "Failed to format ASG")?;
+    
+    // Output the formatted text
+    match output_file {
+        Some(path) => {
+            fs::write(path, formatted)
+                .with_context(|| format!("Failed to write to output file: {}", path.display()))?;
+            println!("Formatted output written to: {}", path.display());
+        },
+        None => {
+            println!("{}", formatted);
+        }
+    }
+    
+    Ok(())
+}
+
+fn handle_lint(input_file: &PathBuf) -> Result<()> {
+    // Read the input file
+    let source = fs::read_to_string(input_file)
+        .with_context(|| format!("Failed to read input file: {}", input_file.display()))?;
+    
+    // Parse the source into an ASG
+    let asg = parse_text(&source)
+        .with_context(|| format!("Failed to parse input file: {}", input_file.display()))?;
+    
+    // Run the linter
+    let lint_errors = lint_graph(&asg);
+    
+    // Print results
+    if lint_errors.is_empty() {
+        println!("{}", "No lint errors found.".green());
+        Ok(())
+    } else {
+        eprintln!("{} {} found:", lint_errors.len(), 
+                 if lint_errors.len() == 1 {"lint error"} else {"lint errors"});
+        
+        for error in lint_errors {
+            print_lint_error(&error, input_file);
+        }
+        
+        // Exit with error code for CI/pipelines
+        process::exit(2);
+    }
+}
+
+fn handle_dump_asg(input_file: &PathBuf, format: &DumpFormat) -> Result<()> {
+    // Read the input file
+    let source = fs::read_to_string(input_file)
+        .with_context(|| format!("Failed to read input file: {}", input_file.display()))?;
+    
+    // Parse the source into an ASG
+    let asg = parse_text(&source)
+        .with_context(|| format!("Failed to parse input file: {}", input_file.display()))?;
+    
+    // Output the ASG in the requested format
+    match format {
+        DumpFormat::Binary => {
+            // For a simple first version, we'll serialize to a binary format via JSON
+            // In a real implementation, you would use asg_core's binary serialization
+            let serialized = serde_json::to_vec(&asg)
+                .with_context(|| "Failed to serialize ASG to binary")?;
+            io::stdout().write_all(&serialized)?;
+        },
+        DumpFormat::Json => {
+            // Pretty-print the ASG as JSON
+            let json = serde_json::to_string_pretty(&asg)
+                .with_context(|| "Failed to serialize ASG to JSON")?;
+            println!("{}", json);
+        }
+    }
+    
+    Ok(())
+}
+
+fn print_lint_error(error: &LintError, file_path: &PathBuf) {
+    let error_code = format!("[{}]", error.code).bright_red();
+    
+    if let Some(location) = &error.location {
+        eprintln!("{}:{}: {} {}: {}",
+                 location.filename.as_deref().unwrap_or(file_path.to_str().unwrap_or("unknown")),
+                 location.start_line,
+                 error_code,
+                 "error".bright_red(),
+                 error.message);
+    } else {
+        eprintln!("{} {}: {} (node: {})",
+                 error_code,
+                 "error".bright_red(),
+                 error.message,
+                 error.node_id);
     }
 }
