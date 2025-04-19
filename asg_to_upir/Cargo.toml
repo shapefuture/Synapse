@@ -1,8 +1,12 @@
 [package]
 name = "asg_to_upir"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+authors = ["The Synapse Team"]
+description = "ASG to UPIR lowering compiler pass for Synapse"
 
 [dependencies]
 asg_core = { path = "../asg_core" }
+type_checker_l1 = { path = "../type_checker_l1" }
 upir_core = { path = "../upir_core" }
+thiserror = "1.0"
