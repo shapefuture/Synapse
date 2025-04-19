@@ -1,7 +1,11 @@
 [package]
 name = "synapse_runtime"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+description = "Minimal runtime support for Synapse (UART prototype)."
+
+[lib]
+crate-type = ["staticlib"]
 
 [dependencies]
-upir_core = { path = "../upir_core" }
+libc = "0.2"
