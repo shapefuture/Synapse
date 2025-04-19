@@ -23,7 +23,12 @@ pub fn check_and_annotate_graph(graph: &mut AsgGraph) -> TypeCheckResult<()> {
     let mut fresh_counter = 0u64;
     let root = graph.root_node_id();
     let ty = inference::infer(&mut ctx, root, graph, &mut subst, &mut fresh_counter)?;
-    // TODO: Actually annotate the ASG nodes with inferred type info
-    let _ = ty;
+
+    // TODO: Actually annotate the ASG nodes with inferred type info, e.g.
+    // for (node_id, node) in &mut graph.nodes {
+    //     node.inferred_type_id = ... // would link to a TypeNode
+    // }
+    // This will be handled post-schema update.
+
     Ok(())
 }
