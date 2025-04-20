@@ -1,0 +1,16 @@
+[package]
+name = "synapse_tutor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+asg_core = { path = "../asg_core" }
+parser_core = { path = "../parser_core" }
+type_checker_l1 = { path = "../type_checker_l1" }
+type_checker_l2 = { path = "../type_checker_l2" }
+proof_synthesis_assist = { path = "../proof_synthesis_assist" }
+clap = { version = "4.0", features = ["derive"] }
+rustyline = "9.1"
+colored = "2.0"
+tonic = "0.8"
+tokio = { version = "1", features = ["full"] }

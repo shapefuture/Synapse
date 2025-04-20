@@ -2,25 +2,99 @@ syntax = "proto3";
 
 package synapseai;
 
+// AI-friendly API for Synapse language services
 service Synapseai {
+  // Parse source code text into an ASG representation
   rpc ParseText (ParseTextRequest) returns (ParseTextResponse);
+  
+  // Type check an ASG with specified allowed effect tags
   rpc CheckAsg (CheckAsgRequest) returns (CheckAsgResponse);
+  
+  // Query type information for a specific node in an ASG
   rpc QueryType (QueryTypeRequest) returns (QueryTypeResponse);
+  
+  // Get all diagnostics for an ASG
   rpc GetDiagnostics (DiagnosticsRequest) returns (DiagnosticsResponse);
+  
+  // Cache an ASG with a session ID for future reference
+  rpc StoreAsg (StoreAsgRequest) returns (StoreAsgResponse);
+  
+  // Retrieve a previously stored ASG
+  rpc GetAsg (GetAsgRequest) returns (GetAsgResponse);
 }
 
 message ParseTextRequest {
   string text = 1;
 }
+
 message ParseTextResponse {
-  string asg_json = 1; // JSON serialization of ASG for now
+  string asg_json = 1;  // JSON serialization of ASG
+  repeated Diagnostic diagnostics = 2; // Any parse errors
 }
 
-message CheckAsgRequest { string asg_json = 1; }
-message CheckAsgResponse { string result = 1; /* Ok/Error/Diagnostics in future */ }
+message CheckAsgRequest {
+  string asg_json = 1;
+  repeated string allowed_effects = 2;
+}
 
-message QueryTypeRequest { string asg_json = 1; uint64 node_id = 2; }
-message QueryTypeResponse { string type_string = 1; }
+message CheckAsgResponse {
+  string type_checked_asg_json = 1;
+  repeated Diagnostic diagnostics = 2;
+}
 
-message DiagnosticsRequest { string asg_json = 1; }
-message DiagnosticsResponse { repeated string errors = 1; }
+message QueryTypeRequest {
+  string asg_json = 1;
+  uint64 node_id = 2;
+}
+
+message QueryTypeResponse {
+  string type_string = 1;
+  string type_json = 2; // Structured type representation
+}
+
+message DiagnosticsRequest {
+  string asg_json = 1;
+}
+
+message DiagnosticsResponse {
+  repeated Diagnostic diagnostics = 1;
+}
+
+message Diagnostic {
+  enum Severity {
+    ERROR = 0;
+    WARNING = 1;
+    INFO = 2;
+    HINT = 3;
+  }
+  
+  string message = 1;
+  Severity severity = 2;
+  SourceLocation location = 3;
+  string code = 4; // Error code if applicable
+}
+
+message SourceLocation {
+  string file_path = 1;
+  uint32 start_line = 2;
+  uint32 start_column = 3;
+  uint32 end_line = 4;
+  uint32 end_column = 5;
+}
+
+message StoreAsgRequest {
+  string asg_json = 1;
+  string session_id = 2;
+}
+
+message StoreAsgResponse {
+  string graph_id = 1;
+}
+
+message GetAsgRequest {
+  string graph_id = 1;
+}
+
+message GetAsgResponse {
+  string asg_json = 1;
+}
