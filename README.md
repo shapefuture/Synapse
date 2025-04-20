@@ -1,109 +1,40 @@
-# Synapse Programming Language
-
-Synapse is a next-generation programming language designed with a focus on formal verification, quantitative types, effect systems, and AI-assisted development.
+# Synapse Language — Core Compiler and Toolchain
 
 ## Overview
 
-Synapse is built on the principle of "Verifiability First," aiming to provide a robust programming language that can express and verify complex properties while remaining practical and performant. Key features include:
+Synapse is a language and metaprogramming ecosystem designed with formal foundations, robust effect/type analysis, algebraic datatypes, parametric polymorphism, modern ADT/pattern-matching, and effect tracking throughout its compilation pipeline.
 
-- Formal semantics and type system
-- Quantitative types for resource management
-- Effect tracking
-- Dependent types for expressing rich invariants
-- AI integration for developer assistance
-- Universal Adaptive Runtime (UART)
-- Support for various hardware targets (CPU, GPU, Quantum)
+## Key Features
 
-## Project Status
+- **Formal Semantics**: Backed by Coq mechanization of type soundness (progress & preservation).
+- **First-Class ASG**: Abstract Semantic Graph core, versioned for extensibility.
+- **Advanced Type System**: Hindley-Milner and System F style polymorphism, ADTs, and full effect metadata on code.
+- **Effect Tracking**: Enforced from parsing to IR to backend.
+- **Extensible IR (UPIR)**: Universally extensible MLIR-inspired core, supports algebraic types, matches, effects.
+- **LLVM/Native Backend**: End-to-end pipeline down to native code, with runtime.
+- **Modern CLI**: Unified tool for parsing, checking, lowering, compiling, and effect checks.
 
-Synapse is currently in the early development phase. We are working on implementing the core language features and compiler pipeline according to the phased approach outlined in our implementation plan.
+## Quick Start
 
-### Completed Features
-
-- [x] Formal semantics definition (core)
-- [x] ASG schema definition
-- [x] Core ASG libraries
-- [x] Minimal parser and formatter
-- [x] Basic CLI and linter (Level 0)
-
-### Current Development Focus
-
-- [ ] Type checker implementation (Level 1)
-- [ ] Universal Polymorphic Intermediate Representation (UPIR)
-- [ ] ASG-to-UPIR lowering
-- [ ] UPIR-to-LLVM lowering
-- [ ] Minimal runtime implementation
-
-## Getting Started
-
-### Prerequisites
-
-- Rust toolchain (stable)
-- Protobuf compiler (protoc)
-
-### Building from Source
-
-```bash
-# Clone the repository
-git clone https://github.com/synapse-lang/synapse.git
-cd synapse
-
-# Build the project
-cargo build --release
-
-# Run tests
-cargo test
+```sh
+cargo build --workspace
+# Type check and effect check
+synapse_cli type-check-effects examples/adt_polymorphic.syn --allow-effect IO,Pure
+# Lower to IR
+synapse_cli lower-upir examples/adt_polymorphic.syn
+# Compile to native
+synapse_cli compile examples/adt_polymorphic.syn -o a.out
 ```
 
-### Using the CLI
+## Documentation
 
-```bash
-# Parse a Synapse file
-cargo run -- parse examples/hello.syn
+- [CLI Usage](docs/CLI.md)
+- [Advanced Type/Eff/ADT rationale](docs/asg_schema_v2_rationale.md)
+- [Effect System Design](docs/effect_system_rationale.md)
+- [Core Semantics & Proofs](docs/semantics/core_v0.1_soundness.md, proofs/core_v0.1_soundness.v)
 
-# Format a Synapse file
-cargo run -- format examples/hello.syn -o formatted.syn
+## Test and Contribute
 
-# Lint a Synapse file
-cargo run -- lint examples/hello.syn
-
-# Dump the ASG to JSON
-cargo run -- dump-asg examples/hello.syn --format json -o hello.json
-```
-
-## Language Example
-
-```
-# A simple function in Synapse
-(x: Int) => x * x + 1
-
-# Function with effects
-(x: Int) => perform('IO', x + 1)
-
-# Reference operations
-(r: Ref Int) => {
-  !r := !r + 1;
-  !r
-}
-```
-
-## Project Structure
-
-- `asg_core/` - Core library for the Abstract Semantic Graph
-- `parser_core/` - Parser for the core language
-- `formatter_core/` - Pretty printer for the core language
-- `synapse_cli/` - Command-line interface
-- `docs/` - Documentation, including formal specifications
-- `schemas/` - Protocol Buffer schemas
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-
-## Acknowledgments
-
-Synapse draws inspiration from many languages and research projects in the programming language community, including but not limited to Rust, OCaml, Lean, F*, and Linear Haskell.
+- Run all tests: `cargo test --workspace`
+- See integration tests for roundtrip examples and effect system regressions.
+- Contributions via PRs and GitHub issues welcome as described in `CONTRIBUTING.md`.
