@@ -1,4 +1,4 @@
-//! Core UPIR → LLVM lowering logic.
+//! Core UPIR → LLVM lowering logic with DataMatch/ADT support stub.
 
 use upir_core::ir::*;
 use upir_core::types::*;
@@ -34,19 +34,15 @@ impl<'ctx> LlvmLoweringContext<'ctx> {
         }
     }
 
-    /// Lower a UPIR type ID (Builtin only for now) to LLVM type.
-    pub fn resolve_type(&mut self, kind: &TypeKind) -> Option<llvm_types::BasicTypeEnum<'ctx>> {
-        match kind {
-            TypeKind::Builtin(b) => match b {
-                BuiltinType::I32 => Some(self.llvm_ctx.i32_type().into()),
-                BuiltinType::I64 => Some(self.llvm_ctx.i64_type().into()),
-                BuiltinType::F32 => Some(self.llvm_ctx.f32_type().into()),
-                BuiltinType::F64 => Some(self.llvm_ctx.f64_type().into()),
-                BuiltinType::Bool => Some(self.llvm_ctx.bool_type().into()),
-                BuiltinType::Void => None,
-            },
-            // Extend with Ptr, Struct, etc
-            _ => None,
+    pub fn lower_match_stub(&mut self, op: &Operation) {
+        // Stub: show in IR as a comment, since full sum-type layout/codegen not yet implemented.
+        if let Some(match_info) = &op.match_info {
+            let comment = format!(
+                "; UPIR core.match ({} arms: {:?})",
+                match_info.arms.len(),
+                match_info.arms.iter().map(|a| &a.ctor).collect::<Vec<_>>()
+            );
+            self.llvm_module.add_global_string(&comment, "synapse.match");
         }
     }
 }
@@ -59,7 +55,6 @@ pub fn lower_upir_to_llvm<'ctx>(
 ) -> Result<LlvmModule<'ctx>> {
     let mut ctx = LlvmLoweringContext::new(llvm_ctx, &upir.name);
 
-    // Lower all functions
     for fun in &upir.functions {
         // Map argument and return types (builtin only)
         let mut llvm_arg_types = vec![];
@@ -101,11 +96,10 @@ pub fn lower_upir_to_llvm<'ctx>(
                     }
                 }
 
-                // Lower each operation (core.add, func.return, etc)
+                // Lower each operation (core.add, func.return, core.match, etc)
                 for op in &block.operations {
                     match op.name.as_str() {
                         "core.constant" => {
-                            // Only i32 for now
                             if let Some(Attribute::Integer(val)) = op.attributes.get("value") {
                                 let const_val = ctx.llvm_ctx.i32_type().const_int(*val as u64, true).into();
                                 let result_val = const_val;
@@ -129,6 +123,10 @@ pub fn lower_upir_to_llvm<'ctx>(
                             } else {
                                 ctx.builder.build_return(None);
                             }
+                        }
+                        "core.match" => {
+                            ctx.lower_match_stub(op);
+                            // Real lowering would be here in the future.
                         }
                         _ => {}
                     }
