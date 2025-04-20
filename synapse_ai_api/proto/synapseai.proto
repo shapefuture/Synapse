@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package synapseai;
+
+service Synapseai {
+  rpc ParseText (ParseTextRequest) returns (ParseTextResponse);
+  rpc CheckAsg (CheckAsgRequest) returns (CheckAsgResponse);
+  rpc QueryType (QueryTypeRequest) returns (QueryTypeResponse);
+  rpc GetDiagnostics (DiagnosticsRequest) returns (DiagnosticsResponse);
+}
+
+message ParseTextRequest {
+  string text = 1;
+}
+message ParseTextResponse {
+  string asg_json = 1; // JSON serialization of ASG for now
+}
+
+message CheckAsgRequest { string asg_json = 1; }
+message CheckAsgResponse { string result = 1; /* Ok/Error/Diagnostics in future */ }
+
+message QueryTypeRequest { string asg_json = 1; uint64 node_id = 2; }
+message QueryTypeResponse { string type_string = 1; }
+
+message DiagnosticsRequest { string asg_json = 1; }
+message DiagnosticsResponse { repeated string errors = 1; }

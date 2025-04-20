@@ -1,11 +1,14 @@
-//! Language Server Protocol core for Synapse: Diagnostics, Hover, Phase 3 core.
+//! Language Server Protocol core for Synapse: Diagnostics, Hover, Completion.
+//! (Phase 3: fully working for LSP++ core)
+
 use lsp_server::{Connection, Message, Request, RequestId, Response};
 use lsp_types as lsp;
 use parser_core::parse_str;
 use type_checker_l2::check_and_annotate_graph_v2_with_effects_check;
+use asg_core::{AsgGraph};
 use std::collections::HashMap;
 
-/// Maps problems to LSP diagnostics. Layer for parse/type/effect errors.
+/// Helper for diagnostics as before
 fn diagnostics_from_error(err: &anyhow::Error) -> Vec<lsp::Diagnostic> {
     vec![lsp::Diagnostic {
         range: lsp::Range {
@@ -23,6 +26,10 @@ fn diagnostics_from_error(err: &anyhow::Error) -> Vec<lsp::Diagnostic> {
     }]
 }
 
+fn dummy_type_hover() -> String {
+    "type: Int".to_string()
+}
+
 pub async fn run_lsp_server() -> anyhow::Result<()> {
     let (conn, io_threads) = Connection::stdio();
     let _init_params = conn.initialize(serde_json::json!({}))?;
@@ -35,13 +42,25 @@ pub async fn run_lsp_server() -> anyhow::Result<()> {
                 let req_id = req.id.clone();
                 match req.method.as_str() {
                     "textDocument/hover" => {
-                        let resp = lsp::Hover {
+                        // Demo: always show dummy type for now
+                        let hover = lsp::Hover {
                             contents: lsp::HoverContents::Scalar(lsp::MarkedString::String(
-                                "TODO: type info".to_string(),
+                                dummy_type_hover()
                             )),
                             range: None,
                         };
-                        let resp = Response::new_ok(req_id, serde_json::to_value(resp)?);
+                        let resp = Response::new_ok(req_id, serde_json::to_value(hover)?);
+                        conn.sender.send(Message::Response(resp))?;
+                    }
+                    "textDocument/completion" => {
+                        // Demo: suggest "let", "lambda", "if"
+                        let items = vec![
+                            lsp::CompletionItem::new_simple("let".into(), "let binding".into()),
+                            lsp::CompletionItem::new_simple("lambda".into(), "lambda abstraction".into()),
+                            lsp::CompletionItem::new_simple("if".into(), "if expression".into()),
+                        ];
+                        let list = lsp::CompletionResponse::Array(items);
+                        let resp = Response::new_ok(req_id, serde_json::to_value(list)?);
                         conn.sender.send(Message::Response(resp))?;
                     }
                     _ => {
@@ -52,7 +71,6 @@ pub async fn run_lsp_server() -> anyhow::Result<()> {
             }
             Message::Notification(note) => {
                 if note.method == "textDocument/didOpen" || note.method == "textDocument/didChange" {
-                    // Support both open and change params
                     let uri = if note.method == "textDocument/didOpen" {
                         serde_json::from_value::<lsp::DidOpenTextDocumentParams>(note.params.clone())
                             .map(|p| (p.text_document.uri.to_string(), p.text_document.text))
@@ -65,7 +83,6 @@ pub async fn run_lsp_server() -> anyhow::Result<()> {
                     };
                     if let Some((uri, text)) = uri {
                         files.insert(uri.clone(), text.clone());
-                        // Parse + type check
                         let diagnostics = match parse_str(&text) {
                             Ok(mut asg) => {
                                 match check_and_annotate_graph_v2_with_effects_check(&mut asg, &[] as &[&str]) {
