@@ -1,9 +1,12 @@
 [package]
 name = "synapse_pkg"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
-asg_core = { path = "../asg_core" }
-upir_core = { path = "../upir_core" }
-synapse_runtime = { path = "../synapse_runtime" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.7"
+reqwest = { version = "0.11", features = ["blocking", "json"] }
+thiserror = "1.0"
+fs-err = "2.9"
