@@ -1,0 +1,192 @@
+\documentclass{article}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathpartir}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usepackage{stmaryrd}
+
+\title{Synapse Core Language Formal Semantics (v0.1)}
+\author{Synapse Language Team}
+\date{\today}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+This document formally defines the syntax, typing rules, and evaluation rules for the core of the Synapse programming language. The core language consists of a simply-typed lambda calculus extended with references, state operations, and a basic effect system. This provides the semantic foundation upon which the full Synapse language will be built.
+
+\section{Syntax}
+
+\subsection{Abstract Syntax}
+
+We define the abstract syntax of the core language as follows:
+
+\begin{align}
+\text{Terms } t ::= &\; x \tag{variables} \\
+                 | &\; \lambda x:\tau. t \tag{abstraction} \\
+                 | &\; t_1 \; t_2 \tag{application} \\
+                 | &\; c \tag{constants} \\
+                 | &\; \texttt{op}(t_1, \ldots, t_n) \tag{primitive operations} \\
+                 | &\; \texttt{ref} \; t \tag{reference creation} \\
+                 | &\; ! t \tag{dereference} \\
+                 | &\; t_1 := t_2 \tag{assignment} \\
+                 | &\; \texttt{perform} \; E \; t \tag{effect performance}
+\end{align}
+
+\begin{align}
+\text{Values } v ::= &\; \lambda x:\tau. t \tag{closures} \\
+                   | &\; c \tag{constants} \\
+                   | &\; \ell \tag{memory locations}
+\end{align}
+
+\begin{align}
+\text{Types } \tau ::= &\; \texttt{Int} \tag{integers} \\
+                    | &\; \texttt{Bool} \tag{booleans} \\
+                    | &\; \tau_1 \rightarrow \tau_2 \tag{function types} \\
+                    | &\; \texttt{Ref} \; \tau \tag{reference types}
+\end{align}
+
+\begin{align}
+\text{Effect Labels } E ::= &\; \texttt{'EffectName'}
+\end{align}
+
+\subsection{Judgments}
+
+We define the following judgments:
+
+\begin{enumerate}
+  \item $\Gamma \vdash t : \tau$ -- Term $t$ has type $\tau$ in context $\Gamma$
+  \item $\langle t, \sigma \rangle \longrightarrow \langle t', \sigma' \rangle$ -- Term $t$ with store $\sigma$ steps to term $t'$ and store $\sigma'$
+\end{enumerate}
+
+\section{Type System}
+
+\subsection{Typing Context}
+
+The typing context $\Gamma$ is a mapping from variables to types:
+\begin{align}
+\Gamma ::= \emptyset \; | \; \Gamma, x : \tau
+\end{align}
+
+\subsection{Typing Rules}
+
+\begin{mathpar}
+\inferrule[T-Var]
+  {x : \tau \in \Gamma}
+  {\Gamma \vdash x : \tau}
+
+\inferrule[T-Abs]
+  {\Gamma, x : \tau_1 \vdash t : \tau_2}
+  {\Gamma \vdash \lambda x:\tau_1. t : \tau_1 \rightarrow \tau_2}
+
+\inferrule[T-App]
+  {\Gamma \vdash t_1 : \tau_1 \rightarrow \tau_2 \\ \Gamma \vdash t_2 : \tau_1}
+  {\Gamma \vdash t_1 \; t_2 : \tau_2}
+
+\inferrule[T-Int]
+  {n \text{ is an integer}}
+  {\Gamma \vdash n : \texttt{Int}}
+
+\inferrule[T-Bool]
+  {b \in \{\texttt{true}, \texttt{false}\}}
+  {\Gamma \vdash b : \texttt{Bool}}
+
+\inferrule[T-Add]
+  {\Gamma \vdash t_1 : \texttt{Int} \\ \Gamma \vdash t_2 : \texttt{Int}}
+  {\Gamma \vdash \texttt{add}(t_1, t_2) : \texttt{Int}}
+
+\inferrule[T-Ref]
+  {\Gamma \vdash t : \tau}
+  {\Gamma \vdash \texttt{ref} \; t : \texttt{Ref} \; \tau}
+
+\inferrule[T-Deref]
+  {\Gamma \vdash t : \texttt{Ref} \; \tau}
+  {\Gamma \vdash !t : \tau}
+
+\inferrule[T-Assign]
+  {\Gamma \vdash t_1 : \texttt{Ref} \; \tau \\ \Gamma \vdash t_2 : \tau}
+  {\Gamma \vdash t_1 := t_2 : \texttt{Unit}}
+
+\inferrule[T-Perform]
+  {\Gamma \vdash t : \tau}
+  {\Gamma \vdash \texttt{perform} \; E \; t : \tau}
+\end{mathpar}
+
+\section{Operational Semantics}
+
+We use small-step Structural Operational Semantics (SOS) to define the evaluation rules of our language.
+
+\subsection{Evaluation Context}
+
+\begin{align}
+\text{Evaluation Contexts } E ::= &\; [~] \tag{hole} \\
+                               | &\; E \; t \tag{application left} \\
+                               | &\; v \; E \tag{application right} \\
+                               | &\; \texttt{op}(v_1, \ldots, v_{i-1}, E, t_{i+1}, \ldots, t_n) \tag{operation argument} \\
+                               | &\; \texttt{ref} \; E \tag{reference creation} \\
+                               | &\; !E \tag{dereference} \\
+                               | &\; E := t \tag{assignment left} \\
+                               | &\; v := E \tag{assignment right} \\
+                               | &\; \texttt{perform} \; E \; E' \tag{effect performance}
+\end{align}
+
+\subsection{Store}
+
+The store $\sigma$ is a mapping from locations $\ell$ to values $v$:
+\begin{align}
+\sigma ::= \emptyset \; | \; \sigma, \ell \mapsto v
+\end{align}
+
+\subsection{Evaluation Rules}
+
+\begin{mathpar}
+\inferrule[E-App]
+  {}
+  {\langle (\lambda x:\tau. t) \; v, \sigma \rangle \longrightarrow \langle [x \mapsto v]t, \sigma \rangle}
+
+\inferrule[E-Add]
+  {n_3 = n_1 + n_2}
+  {\langle \texttt{add}(n_1, n_2), \sigma \rangle \longrightarrow \langle n_3, \sigma \rangle}
+
+\inferrule[E-Ref]
+  {\ell \notin \text{dom}(\sigma)}
+  {\langle \texttt{ref} \; v, \sigma \rangle \longrightarrow \langle \ell, \sigma[\ell \mapsto v] \rangle}
+
+\inferrule[E-Deref]
+  {\sigma(\ell) = v}
+  {\langle !\ell, \sigma \rangle \longrightarrow \langle v, \sigma \rangle}
+
+\inferrule[E-Assign]
+  {}
+  {\langle \ell := v, \sigma \rangle \longrightarrow \langle \texttt{unit}, \sigma[\ell \mapsto v] \rangle}
+
+\inferrule[E-Perform]
+  {}
+  {\langle \texttt{perform} \; E \; v, \sigma \rangle \longrightarrow \langle v, \sigma \rangle}
+
+\inferrule[E-Context]
+  {\langle t, \sigma \rangle \longrightarrow \langle t', \sigma' \rangle}
+  {\langle E[t], \sigma \rangle \longrightarrow \langle E[t'], \sigma' \rangle}
+\end{mathpar}
+
+\section{Type Soundness}
+
+We state the following key theorems for type soundness:
+
+\begin{theorem}[Preservation]
+If $\Gamma \vdash t : \tau$ and $\langle t, \sigma \rangle \longrightarrow \langle t', \sigma' \rangle$, then $\Gamma \vdash t' : \tau$.
+\end{theorem}
+
+\begin{theorem}[Progress]
+If $\Gamma \vdash t : \tau$, then either $t$ is a value or there exists $t'$ and $\sigma'$ such that $\langle t, \sigma \rangle \longrightarrow \langle t', \sigma' \rangle$.
+\end{theorem}
+
+The complete proofs of these theorems will be formalized in the Coq proof assistant.
+
+\end{document}

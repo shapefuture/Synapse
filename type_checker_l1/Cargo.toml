@@ -1,7 +1,11 @@
 [package]
 name = "type_checker_l1"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+authors = ["The Synapse Team"]
+description = "Level 1 type checker for Synapse ASG (Hindley-Milner style type inference)"
 
 [dependencies]
 asg_core = { path = "../asg_core" }
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }

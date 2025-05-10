@@ -1,11 +1,24 @@
 [package]
 name = "synapse_cli"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+description = "Command-line interface for the Synapse language"
+authors = ["The Synapse Team"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 asg_core = { path = "../asg_core" }
 parser_core = { path = "../parser_core" }
 formatter_core = { path = "../formatter_core" }
-type_checker_l1 = { path = "../type_checker_l1" }
-synapse_runtime = { path = "../synapse_runtime" }
+clap = { version = "3.2", features = ["derive"] }
+anyhow = "1.0"
+thiserror = "1.0"
+serde_json = "1.0"
+colored = "2.0"
+fs-err = "2.9"  # Enhanced filesystem operations with better errors
+
+[dev-dependencies]
+assert_cmd = "2.0"  # For CLI integration testing
+predicates = "2.1"  # For test assertions
+tempfile = "3.3"    # For creating temporary test files

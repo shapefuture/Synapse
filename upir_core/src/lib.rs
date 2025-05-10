@@ -1,14 +1,12 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+//! UPIR Core Library for Synapse
+//!
+//! Defines main IR data structures, types, operations, and API.
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub mod ir;
+pub mod types;
+pub mod attributes;
+pub mod dialects;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub use crate::ir::*;
+pub use crate::types::*;
+pub use crate::attributes::*;

@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aspe_pythonic_v1"
+version = "0.1.0"
+description = "AI Syntax Projection Engine - Pythonic to Synapse ASG"
+requires-python = ">=3.8"
+
+[project.dependencies]
+click = "^8.1.3"
+pyyacc = "^0.3.7"
+ast = "^0.0.2"
+numpy = "^1.24.0"

@@ -1,7 +1,10 @@
 [package]
 name = "formatter_core"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+description = "Formatter core for the Synapse language"
+authors = ["Synapse Team"]
 
 [dependencies]
 asg_core = { path = "../asg_core" }
+thiserror = "1.0"

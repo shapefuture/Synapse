@@ -1,10 +1,18 @@
 [package]
 name = "synapse_lsp"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 asg_core = { path = "../asg_core" }
 parser_core = { path = "../parser_core" }
-formatter_core = { path = "../formatter_core" }
 type_checker_l1 = { path = "../type_checker_l1" }
+type_checker_l2 = { path = "../type_checker_l2" }
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+lsp-types = "0.95"
+lsp-server = "0.7"
+anyhow = "1.0"
+thiserror = "1.0"
+log = "0.4"

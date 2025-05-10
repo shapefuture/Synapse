@@ -1,7 +1,9 @@
 [package]
 name = "macro_expander"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 asg_core = { path = "../asg_core" }
+parser_core = { path = "../parser_core" }
+thiserror = "1.0"

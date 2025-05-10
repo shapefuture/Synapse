@@ -1,7 +1,11 @@
 [package]
 name = "upir_to_llvm"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+authors = ["The Synapse Team"]
+description = "UPIR to LLVM IR lowering compiler pass for Synapse"
 
 [dependencies]
 upir_core = { path = "../upir_core" }
+thiserror = "1.0"
+inkwell = "0.4"

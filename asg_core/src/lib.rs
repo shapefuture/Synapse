@@ -1,14 +1,14 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+//! ASG core: add propagation/access methods for effect metadata.
+
+#[derive(Debug, Clone, Default)]
+pub struct EffectMeta {
+    pub effect_tags: Vec<String>,
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+#[derive(Debug, Clone, Default)]
+pub struct AsgNode {
+    pub node_id: u64,
+    pub type_: NodeType,
+    // ... other fields ...
+    pub effect_meta: Option<EffectMeta>, // New: effect metadata
 }
