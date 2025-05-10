@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+// Synapse ASG v2: Adds parametric polymorphism, algebraic datatypes, effect metadata
+
+package synapse.asg;
+
+// Imports and v1 compatibility omitted for brevity
+
+message AsgGraph {
+  map<uint64, AsgNode> nodes = 1;
+  uint64 root_node_id = 2;
+}
+
+message AsgNode {
+  uint64 node_id = 1;
+  NodeType type = 2;
+
+  // Lambda, application, variable, literal, etc from v1
+
+  // --- Polymorphic type abstraction/app ---
+  optional TypeAbs type_abs = 20;
+  optional TypeApp type_app = 21;
+
+  // --- Algebraic Datatype definition, constructor, and match ---
+  optional DataDef data_def = 30;
+  optional DataCtor data_ctor = 31;
+  optional DataMatch data_match = 32;
+
+  // --- Effect meta ---
+  optional EffectMeta effect_meta = 40;
+}
+
+enum NodeType {
+  Unknown = 0;
+  // v1 node types...
+  TypeAbs = 20;
+  TypeApp = 21;
+  DataDef = 30;
+  DataCtor = 31;
+  DataMatch = 32;
+}
+
+message TypeAbs {
+  repeated uint64 type_param_ids = 1;
+  uint64 body_node_id = 2;
+}
+
+// e.g., instantiating List<Int>
+message TypeApp {
+  uint64 type_abs_node_id = 1;
+  repeated uint64 type_arg_node_ids = 2;
+}
+
+message DataDef {
+  string name = 1;
+  repeated string param_names = 2; // for generic types
+  repeated DataCtor ctor_defs = 3;
+}
+
+message DataCtor {
+  string name = 1;
+  repeated uint64 field_type_node_ids = 2;
+}
+
+message DataMatch {
+  uint64 scrutinee_node_id = 1;
+  repeated DataMatchArm arms = 2;
+}
+
+message DataMatchArm {
+  string ctor_name = 1;
+  repeated uint64 pattern_var_node_ids = 2;
+  uint64 body_node_id = 3;
+}
+
+message EffectMeta {
+  repeated string effect_tags = 1;
+}

@@ -1,0 +1,163 @@
+use std::str::FromStr;
+use crate::ast::{Root, Expr, Type};
+
+grammar;
+
+// Root node for the grammar
+pub Root: Root = {
+    <e:Expr> => Root { expr: e },
+};
+
+// Expressions with lowest precedence (top-level expressions)
+Expr: Expr = {
+    LambdaExpr,
+    AssignExpr,
+};
+
+// Lambda expressions: (x: T) => e
+LambdaExpr: Expr = {
+    "(" <id:Identifier> <ty:(":" <Type>)?> ")" "=>" <e:Expr> => {
+        Expr::Lambda(id, ty, Box::new(e))
+    },
+    AssignExpr,
+};
+
+// Assignment expressions: e1 := e2
+AssignExpr: Expr = {
+    <lhs:OrExpr> ":=" <rhs:Expr> => Expr::Assign(Box::new(lhs), Box::new(rhs)),
+    OrExpr,
+};
+
+// Boolean OR
+OrExpr: Expr = {
+    <lhs:OrExpr> "||" <rhs:AndExpr> => {
+        Expr::PrimitiveOp("or".to_string(), vec![lhs, rhs])
+    },
+    AndExpr,
+};
+
+// Boolean AND
+AndExpr: Expr = {
+    <lhs:AndExpr> "&&" <rhs:EqualityExpr> => {
+        Expr::PrimitiveOp("and".to_string(), vec![lhs, rhs])
+    },
+    EqualityExpr,
+};
+
+// Equality comparisons
+EqualityExpr: Expr = {
+    <lhs:EqualityExpr> "==" <rhs:ComparisonExpr> => {
+        Expr::PrimitiveOp("eq".to_string(), vec![lhs, rhs])
+    },
+    <lhs:EqualityExpr> "!=" <rhs:ComparisonExpr> => {
+        Expr::PrimitiveOp("neq".to_string(), vec![lhs, rhs])
+    },
+    ComparisonExpr,
+};
+
+// Comparison operators
+ComparisonExpr: Expr = {
+    <lhs:ComparisonExpr> "<" <rhs:AdditiveExpr> => {
+        Expr::PrimitiveOp("lt".to_string(), vec![lhs, rhs])
+    },
+    <lhs:ComparisonExpr> ">" <rhs:AdditiveExpr> => {
+        Expr::PrimitiveOp("gt".to_string(), vec![lhs, rhs])
+    },
+    <lhs:ComparisonExpr> "<=" <rhs:AdditiveExpr> => {
+        Expr::PrimitiveOp("lte".to_string(), vec![lhs, rhs])
+    },
+    <lhs:ComparisonExpr> ">=" <rhs:AdditiveExpr> => {
+        Expr::PrimitiveOp("gte".to_string(), vec![lhs, rhs])
+    },
+    AdditiveExpr,
+};
+
+// Addition and subtraction
+AdditiveExpr: Expr = {
+    <lhs:AdditiveExpr> "+" <rhs:MultiplicativeExpr> => {
+        Expr::PrimitiveOp("add".to_string(), vec![lhs, rhs])
+    },
+    <lhs:AdditiveExpr> "-" <rhs:MultiplicativeExpr> => {
+        Expr::PrimitiveOp("sub".to_string(), vec![lhs, rhs])
+    },
+    MultiplicativeExpr,
+};
+
+// Multiplication and division
+MultiplicativeExpr: Expr = {
+    <lhs:MultiplicativeExpr> "*" <rhs:UnaryExpr> => {
+        Expr::PrimitiveOp("mul".to_string(), vec![lhs, rhs])
+    },
+    <lhs:MultiplicativeExpr> "/" <rhs:UnaryExpr> => {
+        Expr::PrimitiveOp("div".to_string(), vec![lhs, rhs])
+    },
+    <lhs:MultiplicativeExpr> "%" <rhs:UnaryExpr> => {
+        Expr::PrimitiveOp("mod".to_string(), vec![lhs, rhs])
+    },
+    UnaryExpr,
+};
+
+// Unary operators
+UnaryExpr: Expr = {
+    "!" <e:UnaryExpr> => Expr::Deref(Box::new(e)),
+    "ref" <e:UnaryExpr> => Expr::Ref(Box::new(e)),
+    "perform" "(" <effect:StringLiteral> "," <e:Expr> ")" => {
+        // Strip quotes from the effect name
+        let effect_name = effect.trim_start_matches('\'').trim_end_matches('\'');
+        Expr::Perform(effect_name.to_string(), Box::new(e))
+    },
+    ApplicationExpr,
+};
+
+// Function application
+ApplicationExpr: Expr = {
+    <f:ApplicationExpr> "(" <arg:Expr> ")" => Expr::Application(Box::new(f), Box::new(arg)),
+    PrimaryExpr,
+};
+
+// Primary expressions
+PrimaryExpr: Expr = {
+    Identifier => Expr::Variable(<>),
+    IntLiteral => Expr::IntLiteral(<>),
+    BoolLiteral => Expr::BoolLiteral(<>),
+    "(" <Expr> ")",
+};
+
+// Type expressions
+Type: Type = {
+    <t1:RefType> "->" <t2:Type> => Type::Function(Box::new(t1), Box::new(t2)),
+    RefType,
+};
+
+// Reference types
+RefType: Type = {
+    "Ref" <t:PrimaryType> => Type::Ref(Box::new(t)),
+    PrimaryType,
+};
+
+// Primary types
+PrimaryType: Type = {
+    "Int" => Type::Int,
+    "Bool" => Type::Bool,
+    "Unit" => Type::Unit,
+    "(" <Type> ")",
+};
+
+// Terminals and tokens
+Identifier: String = <s:r"[a-zA-Z_][a-zA-Z0-9_]*"> => s.to_string();
+
+IntLiteral: i64 = <s:r"-?[0-9]+"> => i64::from_str(s).unwrap();
+
+BoolLiteral: bool = {
+    "true" => true,
+    "false" => false,
+};
+
+StringLiteral: String = <s:r"'[^']*'"> => s.to_string();
+
+match {
+    r"\s*" => { }, // Skip whitespace
+    r"//[^\n\r]*[\n\r]*" => { }, // Skip line comments
+    r"/\*([^*]|\*[^/])*\*/" => { }, // Skip block comments
+    _
+}

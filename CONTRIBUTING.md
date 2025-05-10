@@ -1,64 +1,93 @@
 # Contributing to Synapse
 
-Thank you for your interest in contributing to the Synapse programming language project! This document provides guidelines for contributing to the project.
-
-## Code Style
-
-- Follow the Rust style guide and use `rustfmt` for formatting
-- Use meaningful variable and function names
-- Write comprehensive documentation comments (///) for public APIs
-- Include unit tests for all new functionality
-
-## Development Workflow
-
-1. **Task Selection**: Choose a task from the implementation plan (`plan.md`)
-2. **Branch Creation**: Create a branch with a descriptive name (e.g., `feat/p0t3-asg-core-implementation`)
-3. **Implementation**: Implement the feature or fix the bug
-4. **Testing**: Write tests to verify your implementation
-5. **Documentation**: Update documentation as needed
-6. **Pull Request**: Submit a pull request with a clear description of the changes
-
-## Commit Messages
-
-Use the following format for commit messages:
-
-```
-feat(P0T3): Implement ASG serialization
-
-- Add binary serialization using Protocol Buffers
-- Add JSON serialization for debugging
-- Add tests for round-trip serialization
-```
-
-Where the prefix indicates the type of change:
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `test`: Adding or modifying tests
-- `refactor`: Code refactoring
-- `perf`: Performance improvements
-- `chore`: Maintenance tasks
-
-And the parenthesized tag indicates the task ID from the implementation plan.
-
-## Pull Request Process
-
-1. Ensure all tests pass
-2. Update documentation as needed
-3. Request review from at least one maintainer
-4. Address review comments
-5. Once approved, a maintainer will merge the PR
+Thank you for your interest in contributing to the Synapse programming language! This document provides guidelines and information for contributors.
 
 ## Code of Conduct
 
-- Be respectful and inclusive
-- Focus on constructive feedback
-- Assume good intentions
-- Help others learn and grow
+We are committed to providing a welcoming and inclusive environment for all contributors. Please treat everyone with respect and help us maintain a positive community.
 
-## Getting Help
+## Getting Started
 
-If you need help with your contribution, feel free to:
-- Open an issue with questions
-- Ask for clarification in an existing issue
-- Reach out to the maintainers
+1. Fork the repository on GitHub
+2. Clone your fork to your local machine
+3. Add the original repository as an upstream remote
+4. Create a new branch for your changes
+
+## Development Workflow
+
+### Setting Up Your Environment
+
+Ensure you have the following installed:
+- Rust toolchain (stable)
+- Protobuf compiler (protoc)
+- Git
+
+### Building and Testing
+
+```bash
+# Build the project
+cargo build
+
+# Run tests
+cargo test
+```
+
+### Code Style
+
+We follow the Rust standard code style:
+- Use `cargo fmt` to format your code
+- Run `cargo clippy` to check for common issues
+- Write comments for public API using rustdoc format
+- Use meaningful variable and function names
+
+## Pull Request Process
+
+1. Update your branch with the latest changes from upstream
+2. Ensure your code builds and passes all tests
+3. Write tests for your changes
+4. Update documentation if necessary
+5. Submit a pull request with a clear description of your changes
+
+Your pull request should:
+- Have a clear title and description
+- Reference any related issues
+- Explain what problem it solves and how it does so
+- Include any necessary tests
+
+## Commit Message Guidelines
+
+We use a simplified version of Conventional Commits:
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation changes
+- `test`: Adding or modifying tests
+- `refactor`: Code changes that neither fix bugs nor add features
+- `chore`: Changes to the build process or auxiliary tools
+
+Example:
+```
+feat(parser): Add support for effect syntax
+```
+
+## Documentation
+
+Please keep documentation up to date with your changes:
+- Update README.md if necessary
+- Add entries to DESIGN_LOG.md for significant design decisions
+- Update or add formal specifications in docs/ when changing language semantics
+
+## Issues and Feature Requests
+
+Feel free to submit issues and enhancement requests. Please provide as much detail as possible:
+- For bugs: Steps to reproduce, expected behavior, actual behavior
+- For features: Use cases, expected behavior, alternatives considered
+
+## Licensing
+
+By contributing, you agree that your contributions will be licensed under the project's MIT License.
+
+## Questions?
+
+If you have any questions, please create an issue or reach out to the maintainers.
+
+Thank you for contributing to Synapse!

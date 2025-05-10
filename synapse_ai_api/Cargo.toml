@@ -1,8 +1,16 @@
 [package]
 name = "synapse_ai_api"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 asg_core = { path = "../asg_core" }
 parser_core = { path = "../parser_core" }
+type_checker_l1 = { path = "../type_checker_l1" }
+type_checker_l2 = { path = "../type_checker_l2" }
+tokio = { version = "1", features = ["full"] }
+tonic = "0.8"
+prost = "0.11"
+prost-types = "0.11"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

@@ -1,7 +1,15 @@
 [package]
 name = "parser_core"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+description = "Parser core for the Synapse language"
+authors = ["Synapse Team"]
 
 [dependencies]
 asg_core = { path = "../asg_core" }
+lalrpop-util = "0.19"
+regex = "1"
+thiserror = "1.0"
+
+[build-dependencies]
+lalrpop = "0.19"
